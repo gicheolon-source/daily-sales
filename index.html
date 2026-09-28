@@ -116,7 +116,7 @@ details.block summary:focus-visible{outline:2px solid var(--orange);outline-offs
 <body>
 <header class="top">
   <div class="row">
-    <div class="brand"><h1>Dr.Reju-All 매출·광고 현황</h1><span>아마존 · 틱톡샵 · 퍼포먼스 마케팅 — 국가별 · 단위 천원</span></div>
+    <div class="brand"><h1>Dr.Reju-All 매출·광고 현황</h1><span>아마존 · 틱톡샵 · 퍼포먼스 마케팅 — 국가별 · 단위 만원</span></div>
     <div class="datebar">
       <label for="asof">기준일</label><input type="date" id="asof">
       <button class="btn" id="btn-today" type="button" style="background:#fff;color:#1A2233;border-color:#fff">오늘</button>
@@ -229,11 +229,11 @@ details.block summary:focus-visible{outline:2px solid var(--orange);outline-offs
 <!-- ================= PLAN ================= -->
 <section id="tab-plan" hidden>
   <div class="block">
-    <h2>월별 매출 계획 (천원) <small>노란 칸에 입력하면 즉시 저장</small></h2>
+    <h2>월별 매출 계획 (만원) <small>노란 칸에 입력하면 즉시 저장</small></h2>
     <div class="scroll" id="plan-table"></div>
   </div>
   <div class="block">
-    <h2>퍼포먼스 마케팅 월 예산 (천원)</h2>
+    <h2>퍼포먼스 마케팅 월 예산 (만원)</h2>
     <div class="scroll" id="budget-table"></div>
   </div>
 </section>
@@ -274,9 +274,9 @@ const CHANNELS=['아마존','틱톡샵'], PLATFORMS=['Meta','Google','TikTok Ads
 const MONTHS=[...Array(12).keys()].map(i=>i+1);
 
 function defaults(){
-  const plan={};  const EX={'아마존|미국':120000,'아마존|캐나다':8000,'아마존|영국':15000,'아마존|호주':6000,'아마존|중동(UAE)':4000,'틱톡샵|미국':90000,'틱톡샵|영국':25000};
+  const plan={};  const EX={'아마존|미국':12000,'아마존|캐나다':800,'아마존|영국':1500,'아마존|호주':600,'아마존|중동(UAE)':400,'틱톡샵|미국':9000,'틱톡샵|영국':2500};
   for(const k in EX) plan[k]=MONTHS.map(()=>EX[k]);
-  const budget={}; const EB={'Meta|미국':12000,'Meta|영국':4000,'Google|미국':8000,'Google|영국':2500,'TikTok Ads|미국':10000,'TikTok Ads|영국':3000};
+  const budget={}; const EB={'Meta|미국':1200,'Meta|영국':400,'Google|미국':800,'Google|영국':250,'TikTok Ads|미국':1000,'TikTok Ads|영국':300};
   for(const k in EB) budget[k]=MONTHS.map(()=>EB[k]);
   const fx={}; COUNTRIES.forEach(c=>fx[c[0]]=c[2]);
   const owners={'전체|':'온기철','아마존|Subtotal':'온기철','틱톡샵|Subtotal':'온기철','틱톡샵|미국':'김세원','틱톡샵|영국':'왕지윤','PM 전체|':'온기철'};
@@ -288,10 +288,11 @@ function defaults(){
   const EXP={'Meta|미국':[350,42000,900,28,1050],'Meta|영국':[110,15000,320,9,300],'Google|미국':[240,18000,700,22,900],'Google|영국':[70,6000,210,6,190],'TikTok Ads|미국':[300,60000,1100,20,700],'TikTok Ads|영국':[90,20000,380,6,190]};
   const pm=[];
   for(const d of ['2026-09-27','2026-09-28']){ for(const k in EXP){ const [pl,ct]=k.split('|'); const v=EXP[k]; pm.push({date:d,pl,ct,spend:v[0],imp:v[1],clk:v[2],cv:v[3],rev:v[4],memo:'예시'}); } }
-  return {asof:'2026-09-28',fx,thr:{'전체':0.20,'아마존':0.15,'틱톡샵':0.25},roasMin:2.0,owners,plan,budget,daily,pm};
+  return {unit:'만원',asof:'2026-09-28',fx,thr:{'전체':0.20,'아마존':0.15,'틱톡샵':0.25},roasMin:2.0,owners,plan,budget,daily,pm};
 }
 let S; try{ S=JSON.parse(localStorage.getItem(KEY)); }catch(e){ S=null; }
 if(!S||!S.daily){ S=defaults(); }
+if(S.unit!=='만원'){ for(const k in S.plan) S.plan[k]=S.plan[k].map(v=>Math.round(v/10)); for(const k in S.budget) S.budget[k]=S.budget[k].map(v=>Math.round(v/10)); S.unit='만원'; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ console.warn('save failed',e); } }
 
 // ---------- helpers ----------
@@ -300,7 +301,9 @@ const fmt=(n,d=0)=>(n==null||isNaN(n)||n===''?'-':Number(n).toLocaleString('ko-K
 const pct=(n,d=1)=>(n==null||!isFinite(n)?'-':(n*100).toFixed(d)+'%');
 const cur=ct=>(COUNTRIES.find(c=>c[0]===ct)||[])[1]||'';
 const rate=ct=>Number(S.fx[ct]||0);
-const krw=(v,ct)=>(v==null||v===''?0:Number(v)*rate(ct)/1000);
+const krw=(v,ct)=>(v==null||v===''?0:Number(v)*rate(ct)/10000);
+const fmtT=n=>(n==null||isNaN(n)||n===''?'-':fmt(n,Math.abs(n)<10?1:0));
+const fmtW=n=>{ if(n==null||isNaN(n)||n==='') return '-'; const a=Math.abs(n); if(a>=10000) return (n/10000).toFixed(a>=100000?1:2).replace(/\.?0+$/,'')+'억'; return fmtT(n)+'만원'; };
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function dateParts(){ const d=new Date(S.asof+'T00:00:00'); const y=d.getFullYear(), m=d.getMonth()+1; const mdays=new Date(y,m,0).getDate(); const edays=d.getDate(); const mstart=`${y}-${String(m).padStart(2,'0')}-01`; const pm=m===1?12:m-1, py=m===1?y-1:y; const pmstart=`${py}-${String(pm).padStart(2,'0')}-01`; const pmdays=new Date(py,pm,0).getDate(); const yest=new Date(d); yest.setDate(d.getDate()-1); const yst=yest.toISOString().slice(0,10); return {y,m,mdays,edays,mstart,pmstart,pmdays,yst}; }
 function chip(ok){ return ok==null?'':`<span class="chip ${ok?'ok':'ng'}">${ok?'합격':'불합격'}</span>`; }
@@ -347,11 +350,11 @@ function renderReport(){
   $('#report-meta').textContent=`기준일 ${S.asof} · 월간일수 ${D.mdays} · 경과일수 ${D.edays} · 환율 설정 탭 참조`;
   const T=shopMetrics(null,null), PM=pmMetrics(null,null);
   $('#kpis').innerHTML=[
-    ['오늘 매출',fmt(T.today),`일 GOAL ${fmt(T.goal)} · <b class="${T.goalRatio>=1?'pos':'neg'}">${pct(T.goalRatio,0)}</b>`],
-    ['당월 누계 (MTD)',fmt(T.mtd),`계획 ${fmt(T.plan)} · 진척 <b class="${T.prog>=1?'pos':'neg'}">${pct(T.prog)}</b>`],
-    ['월말 예상 매출',fmt(T.forecast),`계획 달성 예상 ${pct(T.forecastRatio,0)}`],
+    ['오늘 매출',fmtW(T.today),`일 GOAL ${fmtW(T.goal)} · <b class="${T.goalRatio>=1?'pos':'neg'}">${pct(T.goalRatio,0)}</b>`],
+    ['당월 누계 (MTD)',fmtW(T.mtd),`계획 ${fmtW(T.plan)} · 진척 <b class="${T.prog>=1?'pos':'neg'}">${pct(T.prog)}</b>`],
+    ['월말 예상 매출',fmtW(T.forecast),`계획 달성 예상 ${pct(T.forecastRatio,0)}`],
     ['MTD 광고비율',pct(T.mtdAdRatio),`기준 ${pct(S.thr['전체'],0)} ${chip(T.mtdPass)}`],
-    ['PM 지출 (MTD)',fmt(PM.mtd),`예산 ${fmt(PM.bud)} · 소진율 ${pct(PM.burn)}`],
+    ['PM 지출 (MTD)',fmtW(PM.mtd),`예산 ${fmtW(PM.bud)} · 소진율 ${pct(PM.burn)}`],
     ['PM ROAS (MTD)',PM.roas==null?'-':PM.roas.toFixed(2)+'x',`하한 ${S.roasMin.toFixed(1)}x ${chip(PM.pass)}`]
   ].map(k=>`<div class="kpi"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
 
@@ -360,50 +363,56 @@ function renderReport(){
   const findD=(ch,ct)=>S.daily.find(r=>r.date===S.asof&&r.ch===ch&&r.ct===ct);
   const findP=(pl,ct)=>S.pm.find(r=>r.date===S.asof&&r.pl===pl&&r.ct===ct);
   const qeShop=(a,b)=>{ const r=findD(a,b)||{}; const F=(k,l)=>`<label>${l}<input type="number" step="0.01" data-q="${k}" value="${r[k]??''}"></label>`;
-    return `<form class="qe" hidden data-kind="shop" data-a="${a}" data-b="${b}">${F('sales','총매출('+cur(b)+')')}${F('ad','광고비')}${F('orders','주문수')}${F('adrev','광고매출')}${a==='틱톡샵'?F('aff','어필리에이트'):''}<div class="qbtn"><span class="k" style="flex:1;font-size:11px;align-self:center">${S.asof} 기준 · 기존 행이 있으면 덮어씀</span><button class="btn primary" type="submit">저장</button></div></form>`; };
+    const D2=dateParts(); const planNow=(S.plan[a+'|'+b]||[])[D2.m-1]||0;
+    return `<form class="qe" hidden data-kind="shop" data-a="${a}" data-b="${b}"><label>담당자<input type="text" data-q="owner" value="${esc(owner(a,b))}" style="text-align:left"></label><label>${D2.m}월 목표(만원)<input type="number" step="1" data-q="plan" value="${planNow}"></label>${F('sales','총매출('+cur(b)+')')}${F('ad','광고비')}${F('orders','주문수')}${F('adrev','광고매출')}${a==='틱톡샵'?F('aff','어필리에이트'):''}<div class="qbtn"><span class="k" style="flex:1;font-size:11px;align-self:center">${S.asof} 기준 · 매출 칸을 비우면 실적은 저장 안 됨</span><button class="btn primary" type="submit">저장</button></div></form>`; };
   const qePm=(a,b)=>{ const r=findP(a,b)||{}; const F=(k,l)=>`<label>${l}<input type="number" step="0.01" data-q="${k}" value="${r[k]??''}"></label>`;
-    return `<form class="qe" hidden data-kind="pm" data-a="${a}" data-b="${b}">${F('spend','지출('+cur(b)+')')}${F('imp','노출')}${F('clk','클릭')}${F('cv','전환수')}${F('rev','전환매출')}<div class="qbtn"><span class="k" style="flex:1;font-size:11px;align-self:center">${S.asof} 기준</span><button class="btn primary" type="submit">저장</button></div></form>`; };
+    const D2=dateParts(); const budNow=(S.budget[a+'|'+b]||[])[D2.m-1]||0;
+    return `<form class="qe" hidden data-kind="pm" data-a="${a}" data-b="${b}"><label>담당자<input type="text" data-q="owner" value="${esc(owner(a,b))}" style="text-align:left"></label><label>${D2.m}월 예산(만원)<input type="number" step="1" data-q="plan" value="${budNow}"></label>${F('spend','지출('+cur(b)+')')}${F('imp','노출')}${F('clk','클릭')}${F('cv','전환수')}${F('rev','전환매출')}<div class="qbtn"><span class="k" style="flex:1;font-size:11px;align-self:center">${S.asof} 기준</span><button class="btn primary" type="submit">저장</button></div></form>`; };
   const shopCard=(a,b,cls)=>{ const m=shopMetrics(a,b); const paceRatio=m.plan?m.mtd/m.plan:0; const w=Math.min(100,paceRatio*100); const behind=m.prog!=null&&m.prog<1; const adBad=m.mtdPass===false;
     if(behind) alerts.push(`${a} ${b} 진척 ${pct(m.prog,0)}`); if(adBad) alerts.push(`${a} ${b} 광고비율 ${pct(m.mtdAdRatio)} (상한 ${pct(S.thr[a],0)})`);
-    return `<div class="c ${cls}"><div class="n"><b>${b} <span class="k" style="font-weight:400">${cur(b)}</span></b><span>${esc(owner(a,b))} · <button type="button" class="edit-toggle">${findD(a,b)?'오늘 수정':'오늘 입력'}</button></span></div>
-      <div class="big">${fmt(m.today)}<small>오늘 · 목표 대비 <span class="${m.goalRatio>=1?'pos':'neg'}">${pct(m.goalRatio,0)}</span></small></div>
-      <div class="bar" title="MTD ${fmt(m.mtd)} / 계획 ${fmt(m.plan)}"><i class="${behind?'warn':'good'}" style="width:${w}%"></i><b style="left:${pace*100}%"></b></div>
-      <div class="m"><span>MTD <strong>${fmt(m.mtd)}</strong> / ${fmt(m.plan)}</span><span>진척 <strong class="${behind?'neg':'pos'}">${pct(m.prog,0)}</strong></span></div>
+    return `<div class="c ${cls}"><div class="n"><b>${b} <span class="k" style="font-weight:400">${cur(b)}</span></b><span>${esc(owner(a,b))} · <button type="button" class="edit-toggle">${findD(a,b)?'수정':'입력·설정'}</button></span></div>
+      <div class="big">${fmtW(m.today)}<small>오늘 · 목표 대비 <span class="${m.goalRatio>=1?'pos':'neg'}">${pct(m.goalRatio,0)}</span></small></div>
+      <div class="bar" title="MTD ${fmtW(m.mtd)} / 계획 ${fmtW(m.plan)}"><i class="${behind?'warn':'good'}" style="width:${w}%"></i><b style="left:${pace*100}%"></b></div>
+      <div class="m"><span>MTD <strong>${fmtW(m.mtd)}</strong> / ${fmtW(m.plan)}</span><span>진척 <strong class="${behind?'neg':'pos'}">${pct(m.prog,0)}</strong></span></div>
       <div class="row2"><span>광고비율 ${pct(m.mtdAdRatio)}</span>${chip(m.mtdPass)}<span>·</span><span>월말 예상 ${pct(m.forecastRatio,0)}</span>${a==='틱톡샵'?`<span>·</span><span>어필 ${pct(m.affShare,0)}</span>`:''}</div>${qeShop(a,b)}</div>`; };
   $('#ov-amz').innerHTML=SHOP_ROWS.filter(r=>r[0]==='아마존').map(r=>shopCard(r[0],r[1],'amz')).join('');
   $('#ov-tt').innerHTML=SHOP_ROWS.filter(r=>r[0]==='틱톡샵').map(r=>shopCard(r[0],r[1],'tt')).join('');
   $('#ov-pm').innerHTML=PM_ROWS.map(r=>{ const m=pmMetrics(r[0],r[1]); const w=Math.min(100,(m.burn||0)*100); if(m.pass===false) alerts.push(`${r[0]} ${r[1]} ROAS ${m.roas.toFixed(2)}x (하한 ${S.roasMin.toFixed(1)}x)`); if(m.burnHot) alerts.push(`${r[0]} ${r[1]} 예산 과소진 ${pct(m.burn,0)}`);
-    return `<div class="c pm"><div class="n"><b>${r[0]} · ${r[1]}</b><span>${esc(owner(r[0],r[1]))} · <button type="button" class="edit-toggle">${findP(r[0],r[1])?'오늘 수정':'오늘 입력'}</button></span></div>
+    return `<div class="c pm"><div class="n"><b>${r[0]} · ${r[1]}</b><span>${esc(owner(r[0],r[1]))} · <button type="button" class="edit-toggle">${findP(r[0],r[1])?'수정':'입력·설정'}</button></span></div>
       <div class="big">${m.roas==null?'-':m.roas.toFixed(2)+'x'}<small>ROAS (MTD) ${chip(m.pass)}</small></div>
-      <div class="bar" title="지출 ${fmt(m.mtd)} / 예산 ${fmt(m.bud)}"><i class="${m.burnHot?'warn':'pm'}" style="width:${w}%"></i><b style="left:${pace*100}%"></b></div>
-      <div class="m"><span>지출 <strong>${fmt(m.mtd)}</strong> / ${fmt(m.bud)}</span><span>소진 <strong class="${m.burnHot?'neg':''}">${pct(m.burn,0)}</strong></span></div>
-      <div class="row2"><span>전환매출 ${fmt(m.rev)}</span><span>·</span><span>CPA ${fmt(m.cpa,1)}</span><span>·</span><span>오늘 ${fmt(m.today)} (${m.todayRoas==null?'-':m.todayRoas.toFixed(2)+'x'})</span></div>${qePm(r[0],r[1])}</div>`; }).join('');
+      <div class="bar" title="지출 ${fmtW(m.mtd)} / 예산 ${fmtW(m.bud)}"><i class="${m.burnHot?'warn':'pm'}" style="width:${w}%"></i><b style="left:${pace*100}%"></b></div>
+      <div class="m"><span>지출 <strong>${fmtW(m.mtd)}</strong> / ${fmtW(m.bud)}</span><span>소진 <strong class="${m.burnHot?'neg':''}">${pct(m.burn,0)}</strong></span></div>
+      <div class="row2"><span>전환매출 ${fmtW(m.rev)}</span><span>·</span><span>CPA ${fmtW(m.cpa)}</span><span>·</span><span>오늘 ${fmtW(m.today)} (${m.todayRoas==null?'-':m.todayRoas.toFixed(2)+'x'})</span></div>${qePm(r[0],r[1])}</div>`; }).join('');
   $('#alerts').innerHTML=alerts.length?alerts.map(a=>`<span class="alert">⚠ ${esc(a)}</span>`).join(''):'<span class="alert good">✓ 모든 항목 합격 — 기준 이내</span>';
 
   const layout=[['전체','','total'],['아마존','Subtotal','ch'],...SHOP_ROWS.filter(r=>r[0]==='아마존').map(r=>[r[0],r[1],'ct']),['틱톡샵','Subtotal','ch'],...SHOP_ROWS.filter(r=>r[0]==='틱톡샵').map(r=>[r[0],r[1],'ct'])];
   let h=`<table><thead><tr><th class="l" rowspan="2">채널</th><th class="l" rowspan="2">국가</th><th class="l" rowspan="2">담당자</th><th rowspan="2">월 계획</th><th rowspan="2">일 GOAL</th><th rowspan="2">어제</th><th class="grp" colspan="6">오늘</th><th class="grp" colspan="6">당월 누계 (MTD)</th><th class="grp" colspan="2">월말 예상</th><th class="grp" colspan="2">주문</th><th class="grp" colspan="2">광고매출</th><th class="grp" colspan="2">어필리에이트</th><th class="grp" colspan="3">전월 대비</th></tr>
   <tr><th>매출(현지)</th><th>매출</th><th>목표 대비</th><th>광고비</th><th>광고비율</th><th>합/불</th><th>매출</th><th>진척율</th><th>합/불</th><th>광고비</th><th>광고비율</th><th>합/불</th><th>예상 매출</th><th>달성 예상</th><th>MTD 주문</th><th>AOV</th><th>MTD</th><th>비중</th><th>MTD</th><th>비중</th><th>전월</th><th>전월 일평균</th><th>MTD 일평균/전월</th></tr></thead><tbody>`;
   for(const [a,b,lv] of layout){ const m=shopMetrics(lv==='total'?null:a, lv==='ct'?b:null); const cls=lv==='total'?'tot':lv==='ch'?'sub':'';
-    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}${lv==='ct'?` <span class="k">(${cur(b)})</span>`:''}</td><td class="l">${esc(owner(a,b))}</td><td>${fmt(m.plan)}</td><td>${fmt(m.goal)}</td><td>${fmt(m.yst)}</td><td>${m.todayLoc==null?'':fmt(m.todayLoc,2)}</td><td>${fmt(m.today)}</td><td class="${m.goalRatio>=1?'pos':'neg'}">${pct(m.goalRatio,0)}</td><td>${fmt(m.todayAd)}</td><td>${pct(m.todayAdRatio)}</td><td>${chip(m.todayPass)}</td><td>${fmt(m.mtd)}</td><td class="${m.prog>=1?'pos':'neg'}">${pct(m.prog)}</td><td>${chip(m.progPass)}</td><td>${fmt(m.mtdAd)}</td><td>${pct(m.mtdAdRatio)}</td><td>${chip(m.mtdPass)}</td><td>${fmt(m.forecast)}</td><td>${pct(m.forecastRatio,0)}</td><td>${fmt(m.orders)}</td><td>${fmt(m.aov,1)}</td><td>${fmt(m.adrev)}</td><td>${pct(m.adShare)}</td><td>${a==='아마존'?'-':fmt(m.aff)}</td><td>${a==='아마존'?'-':pct(m.affShare)}</td><td>${fmt(m.prev)}</td><td>${fmt(m.prevAvg)}</td><td>${pct(m.mom,0)}</td></tr>`; }
+    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}${lv==='ct'?` <span class="k">(${cur(b)})</span>`:''}</td><td class="l">${esc(owner(a,b))}</td><td>${fmtT(m.plan)}</td><td>${fmtT(m.goal)}</td><td>${fmtT(m.yst)}</td><td>${m.todayLoc==null?'':fmt(m.todayLoc,2)}</td><td>${fmtT(m.today)}</td><td class="${m.goalRatio>=1?'pos':'neg'}">${pct(m.goalRatio,0)}</td><td>${fmtT(m.todayAd)}</td><td>${pct(m.todayAdRatio)}</td><td>${chip(m.todayPass)}</td><td>${fmtT(m.mtd)}</td><td class="${m.prog>=1?'pos':'neg'}">${pct(m.prog)}</td><td>${chip(m.progPass)}</td><td>${fmtT(m.mtdAd)}</td><td>${pct(m.mtdAdRatio)}</td><td>${chip(m.mtdPass)}</td><td>${fmtT(m.forecast)}</td><td>${pct(m.forecastRatio,0)}</td><td>${fmt(m.orders)}</td><td>${fmtT(m.aov)}</td><td>${fmtT(m.adrev)}</td><td>${pct(m.adShare)}</td><td>${a==='아마존'?'-':fmtT(m.aff)}</td><td>${a==='아마존'?'-':pct(m.affShare)}</td><td>${fmtT(m.prev)}</td><td>${fmtT(m.prevAvg)}</td><td>${pct(m.mom,0)}</td></tr>`; }
   $('#shop-table').innerHTML=h+'</tbody></table>';
 
   const pl=[['전체','','total']]; PLATFORMS.forEach(p=>{ pl.push([p,'Subtotal','ch']); PM_ROWS.filter(r=>r[0]===p).forEach(r=>pl.push([r[0],r[1],'ct'])); });
   h=`<table><thead><tr><th class="l" rowspan="2">플랫폼</th><th class="l" rowspan="2">국가</th><th class="l" rowspan="2">담당자</th><th rowspan="2">월 예산</th><th rowspan="2">일 예산</th><th class="grp" colspan="4">오늘</th><th class="grp" colspan="11">당월 누계 (MTD)</th><th class="grp" colspan="2">월말 예상</th></tr><tr><th>지출(현지)</th><th>지출</th><th>전환매출</th><th>ROAS</th><th>지출</th><th>소진율</th><th>노출</th><th>클릭</th><th>CTR</th><th>CPC</th><th>전환수</th><th>CPA</th><th>전환매출</th><th>ROAS</th><th>합/불</th><th>예상 지출</th><th>예산 대비</th></tr></thead><tbody>`;
   for(const [a,b,lv] of pl){ const m=pmMetrics(lv==='total'?null:a, lv==='ct'?b:null); const cls=lv==='total'?'tot':lv==='ch'?'sub':''; const on=lv==='total'?owner('PM 전체',''):owner(a,b);
-    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}${lv==='ct'?` <span class="k">(${cur(b)})</span>`:''}</td><td class="l">${esc(on)}</td><td>${fmt(m.bud)}</td><td>${fmt(m.dayBud)}</td><td>${m.todayLoc==null?'':fmt(m.todayLoc,2)}</td><td>${fmt(m.today)}</td><td>${fmt(m.todayRev)}</td><td>${m.todayRoas==null?'-':m.todayRoas.toFixed(2)+'x'}</td><td>${fmt(m.mtd)}</td><td class="${m.burnHot?'neg':''}">${pct(m.burn)}</td><td>${fmt(m.imp)}</td><td>${fmt(m.clk)}</td><td>${pct(m.ctr,2)}</td><td>${fmt(m.cpc,2)}</td><td>${fmt(m.cv)}</td><td>${fmt(m.cpa,1)}</td><td>${fmt(m.rev)}</td><td>${m.roas==null?'-':m.roas.toFixed(2)+'x'}</td><td>${chip(m.pass)}</td><td>${fmt(m.forecast)}</td><td>${pct(m.fRatio,0)}</td></tr>`; }
+    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}${lv==='ct'?` <span class="k">(${cur(b)})</span>`:''}</td><td class="l">${esc(on)}</td><td>${fmtT(m.bud)}</td><td>${fmtT(m.dayBud)}</td><td>${m.todayLoc==null?'':fmt(m.todayLoc,2)}</td><td>${fmtT(m.today)}</td><td>${fmtT(m.todayRev)}</td><td>${m.todayRoas==null?'-':m.todayRoas.toFixed(2)+'x'}</td><td>${fmtT(m.mtd)}</td><td class="${m.burnHot?'neg':''}">${pct(m.burn)}</td><td>${fmt(m.imp)}</td><td>${fmt(m.clk)}</td><td>${pct(m.ctr,2)}</td><td>${fmtT(m.cpc)}</td><td>${fmt(m.cv)}</td><td>${fmtT(m.cpa)}</td><td>${fmtT(m.rev)}</td><td>${m.roas==null?'-':m.roas.toFixed(2)+'x'}</td><td>${chip(m.pass)}</td><td>${fmtT(m.forecast)}</td><td>${pct(m.fRatio,0)}</td></tr>`; }
   $('#pm-table').innerHTML=h+'</tbody></table>';
 
-  $('#year-label').textContent=`${D.y}년 · 실적은 일일입력 합계 · 단위 천원`;
+  $('#year-label').textContent=`${D.y}년 · 실적은 일일입력 합계 · 단위 만원`;
   h=`<table><thead><tr><th class="l" rowspan="2">채널</th><th class="l" rowspan="2">국가</th>${MONTHS.map(m=>`<th class="grp" colspan="2">${m}월</th>`).join('')}<th class="grp" colspan="3">연간</th></tr><tr>${MONTHS.map(()=>'<th>계획</th><th>실적</th>').join('')}<th>계획</th><th>실적</th><th>달성율</th></tr></thead><tbody>`;
   for(const [a,b,lv] of layout){ const m=shopMetrics(lv==='total'?null:a, lv==='ct'?b:null); const cls=lv==='total'?'tot':lv==='ch'?'sub':''; const yp=m.months.reduce((s,x)=>s+x.p,0), ya=m.months.reduce((s,x)=>s+x.a,0);
-    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}</td>${m.months.map(x=>`<td class="k">${fmt(x.p)}</td><td>${fmt(x.a)}</td>`).join('')}<td class="k">${fmt(yp)}</td><td>${fmt(ya)}</td><td>${pct(yp?ya/yp:null)}</td></tr>`; }
+    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}</td>${m.months.map(x=>`<td class="k">${fmtT(x.p)}</td><td>${fmtT(x.a)}</td>`).join('')}<td class="k">${fmtT(yp)}</td><td>${fmtT(ya)}</td><td>${pct(yp?ya/yp:null)}</td></tr>`; }
   $('#month-table').innerHTML=h+'</tbody></table>';
 }
 
 // ---------- quick edit on report cards ----------
 $('#tab-report').addEventListener('click',e=>{ const t=e.target.closest('.edit-toggle'); if(!t) return; const f=t.closest('.c').querySelector('.qe'); f.hidden=!f.hidden; if(!f.hidden) f.querySelector('input').focus(); });
 $('#tab-report').addEventListener('submit',e=>{ const f=e.target.closest('form.qe'); if(!f) return; e.preventDefault();
-  const a=f.dataset.a,b=f.dataset.b; const vals={}; f.querySelectorAll('[data-q]').forEach(i=>vals[i.dataset.q]=num(i.value));
+  const a=f.dataset.a,b=f.dataset.b; const vals={}; f.querySelectorAll('[data-q]').forEach(i=>vals[i.dataset.q]=(i.type==='text'?i.value.trim():num(i.value)));
+  const Dm=dateParts().m-1; S.owners[a+'|'+b]=vals.owner||'';
+  if(f.dataset.kind==='shop'){ (S.plan[a+'|'+b]||(S.plan[a+'|'+b]=MONTHS.map(()=>0)))[Dm]=vals.plan||0; } else { (S.budget[a+'|'+b]||(S.budget[a+'|'+b]=MONTHS.map(()=>0)))[Dm]=vals.plan||0; }
+  const hasNum=['sales','ad','orders','adrev','aff','spend','imp','clk','cv','rev'].some(k=>vals[k]!=null);
+  if(!hasNum){ save(); render(); return; }
   if(f.dataset.kind==='shop'){ let r=S.daily.find(x=>x.date===S.asof&&x.ch===a&&x.ct===b); if(!r){ r={date:S.asof,ch:a,ct:b,memo:''}; S.daily.push(r); } Object.assign(r,{sales:vals.sales,ad:vals.ad,orders:vals.orders,adrev:vals.adrev,aff:a==='틱톡샵'?vals.aff:null}); if(r.memo==='예시') r.memo=''; }
   else { let r=S.pm.find(x=>x.date===S.asof&&x.pl===a&&x.ct===b); if(!r){ r={date:S.asof,pl:a,ct:b,memo:''}; S.pm.push(r); } Object.assign(r,{spend:vals.spend,imp:vals.imp,clk:vals.clk,cv:vals.cv,rev:vals.rev}); if(r.memo==='예시') r.memo=''; }
   save(); render(); });
@@ -420,9 +429,9 @@ function renderDaily(){
   const rows=S.daily.map((r,i)=>({...r,i})).sort((a,b)=>b.date.localeCompare(a.date)||a.ch.localeCompare(b.ch)||a.ct.localeCompare(b.ct));
   $('#daily-count').textContent=`${rows.length}행`;
   if(!rows.length){ $('#daily-table').innerHTML='<div class="empty">아직 입력이 없습니다. 위 폼으로 채널·국가별 하루 1행씩 추가하세요.</div>'; return; }
-  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">채널</th><th class="l">국가</th><th>통화</th><th>환율</th><th>총매출(현지)</th><th>광고비(현지)</th><th>주문수</th><th>광고매출(현지)</th><th>어필리에이트(현지)</th><th>총매출(천원)</th><th>광고비(천원)</th><th class="l">비고</th><th></th></tr></thead><tbody>';
+  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">채널</th><th class="l">국가</th><th>통화</th><th>환율</th><th>총매출(현지)</th><th>광고비(현지)</th><th>주문수</th><th>광고매출(현지)</th><th>어필리에이트(현지)</th><th>총매출(만원)</th><th>광고비(만원)</th><th class="l">비고</th><th></th></tr></thead><tbody>';
   for(const r of rows){ const F=(k,step='0.01')=>`<input type="number" step="${step}" value="${r[k]??''}" data-i="${r.i}" data-k="${k}">`;
-    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="ch">${CHANNELS.map(c=>`<option ${c===r.ch?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td class="k">${fmt(rate(r.ct),1)}</td><td>${F('sales')}</td><td>${F('ad')}</td><td>${F('orders','1')}</td><td>${F('adrev')}</td><td>${r.ch==='아마존'?'<span class="k">-</span>':F('aff')}</td><td>${fmt(krw(r.sales,r.ct))}</td><td>${fmt(krw(r.ad,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
+    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="ch">${CHANNELS.map(c=>`<option ${c===r.ch?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td class="k">${fmt(rate(r.ct),1)}</td><td>${F('sales')}</td><td>${F('ad')}</td><td>${F('orders','1')}</td><td>${F('adrev')}</td><td>${r.ch==='아마존'?'<span class="k">-</span>':F('aff')}</td><td>${fmtT(krw(r.sales,r.ct))}</td><td>${fmtT(krw(r.ad,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
   $('#daily-table').innerHTML=h+'</tbody></table>';
 }
 $('#daily-table').addEventListener('change',e=>{ const t=e.target; if(t.dataset.k==null) return; const r=S.daily[+t.dataset.i]; r[t.dataset.k]=(t.type==='number')?num(t.value):t.value; save(); render(); });
@@ -433,9 +442,9 @@ function renderPmLog(){
   const rows=S.pm.map((r,i)=>({...r,i})).sort((a,b)=>b.date.localeCompare(a.date)||a.pl.localeCompare(b.pl)||a.ct.localeCompare(b.ct));
   $('#pm-count').textContent=`${rows.length}행`;
   if(!rows.length){ $('#pm-log-table').innerHTML='<div class="empty">아직 입력이 없습니다.</div>'; return; }
-  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">플랫폼</th><th class="l">국가</th><th>통화</th><th>지출(현지)</th><th>노출</th><th>클릭</th><th>전환수</th><th>전환매출(현지)</th><th>지출(천원)</th><th>전환매출(천원)</th><th class="l">캠페인/비고</th><th></th></tr></thead><tbody>';
+  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">플랫폼</th><th class="l">국가</th><th>통화</th><th>지출(현지)</th><th>노출</th><th>클릭</th><th>전환수</th><th>전환매출(현지)</th><th>지출(만원)</th><th>전환매출(만원)</th><th class="l">캠페인/비고</th><th></th></tr></thead><tbody>';
   for(const r of rows){ const F=(k,step='0.01')=>`<input type="number" step="${step}" value="${r[k]??''}" data-i="${r.i}" data-k="${k}">`;
-    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="pl">${PLATFORMS.map(c=>`<option ${c===r.pl?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td>${F('spend')}</td><td>${F('imp','1')}</td><td>${F('clk','1')}</td><td>${F('cv','1')}</td><td>${F('rev')}</td><td>${fmt(krw(r.spend,r.ct))}</td><td>${fmt(krw(r.rev,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
+    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="pl">${PLATFORMS.map(c=>`<option ${c===r.pl?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td>${F('spend')}</td><td>${F('imp','1')}</td><td>${F('clk','1')}</td><td>${F('cv','1')}</td><td>${F('rev')}</td><td>${fmtT(krw(r.spend,r.ct))}</td><td>${fmtT(krw(r.rev,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
   $('#pm-log-table').innerHTML=h+'</tbody></table>';
 }
 $('#pm-log-table').addEventListener('change',e=>{ const t=e.target; if(t.dataset.k==null) return; const r=S.pm[+t.dataset.i]; r[t.dataset.k]=(t.type==='number')?num(t.value):t.value; save(); render(); });
