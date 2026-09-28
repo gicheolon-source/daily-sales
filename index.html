@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dr.Reju-All 매출·광고 현황</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1B2A4A; --navy-2:#26385E; --paper:#F3F4F7; --card:#FFFFFF; --ink:#1A2233; --muted:#5B6678; --line:#DCE0E8;
+  --blue:#2E75B6; --blue-soft:#E4EEF8; --orange:#E07A3F; --orange-soft:#FBE9DD; --green:#1E7F4F; --green-soft:#DFF3E7; --red:#C0392B; --red-soft:#FADEDB;
+  --input:#FFF6D6;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --paper:#12182A; --card:#1B2340; --ink:#EEF1F7; --muted:#A5AFC4; --line:#2E3A5C; --blue-soft:#1F3358; --orange-soft:#4A2E1E; --green-soft:#183F2C; --red-soft:#4A2020; --input:#3A3418; --navy:#0F1830; --navy-2:#1B2340; } }
+:root[data-theme="dark"]{ --paper:#12182A; --card:#1B2340; --ink:#EEF1F7; --muted:#A5AFC4; --line:#2E3A5C; --blue-soft:#1F3358; --orange-soft:#4A2E1E; --green-soft:#183F2C; --red-soft:#4A2020; --input:#3A3418; --navy:#0F1830; --navy-2:#1B2340; }
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.2}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--navy);color:#F6F5F1;padding:calc(12px + env(safe-area-inset-top,0px)) 24px 0;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.top .row{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand h1{font-size:18px;font-weight:700}
+.brand span{font-size:13px;color:#C9D2E3}
+.datebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.datebar label{font-size:13px;color:#C9D2E3}
+.datebar input[type=date]{background:#fff;color:#1A2233;border:0;border-radius:6px;padding:6px 10px}
+.tabs{display:flex;gap:2px;margin-top:10px;overflow-x:auto}
+.tabs button{background:transparent;border:0;color:#C9D2E3;padding:10px 16px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;font-weight:500}
+.tabs button[aria-selected=true]{background:var(--paper);color:var(--ink);font-weight:700}
+.tabs button:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}
+main{padding:20px 24px 60px;max-width:1700px;margin:0 auto}
+section[hidden]{display:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+.toolbar .grow{flex:1}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:500}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.danger{color:var(--red)}
+.btn:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.note{color:var(--muted);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi .v{font-size:30px;font-weight:900;line-height:1.15;margin-top:2px}
+.kpi .s{font-size:13px;color:var(--muted);margin-top:4px}
+.block{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.block h2{font-size:16px;padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.block h2 small{font-weight:400;color:var(--muted);font-size:13px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right}
+th{position:sticky;top:0;background:var(--card);font-weight:600;color:var(--muted);z-index:1}
+th.grp{text-align:center;background:var(--paper);color:var(--ink);font-weight:700;border-left:1px solid var(--line)}
+td:first-child,th:first-child,td.l,th.l{text-align:left}
+tr.sub td{background:var(--paper);font-weight:700}
+tr.tot td{background:var(--navy);color:#F6F5F1;font-weight:700}
+tr.tot td .chip{color:inherit}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.ok{background:var(--green-soft);color:var(--green)}
+.ng{background:var(--red-soft);color:var(--red)}
+.pos{color:var(--green);font-weight:700}
+.neg{color:var(--red);font-weight:700}
+td.k{color:var(--muted)}
+.grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;padding:14px 16px}
+.grid-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.grid-form input,.grid-form select{background:var(--input);border:1px solid var(--line);border-radius:6px;padding:7px 9px;color:var(--ink);min-width:0}
+.grid-form .act{align-self:end}
+table.edit td input,table.edit td select{width:100%;background:var(--input);border:1px solid var(--line);border-radius:5px;padding:4px 6px;text-align:right;min-width:70px;color:var(--ink)}
+table.edit td select{text-align:left}
+table.edit td{padding:4px 6px}
+.legend{padding:12px 16px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.qe{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:6px;padding-top:8px;border-top:1px dashed var(--line)}
+.qe label{display:flex;flex-direction:column;font-size:11px;color:var(--muted)}
+.qe input{background:var(--input);border:1px solid var(--line);border-radius:5px;padding:4px 6px;text-align:right;min-width:0;color:var(--ink);font-size:13px}
+.qe .qbtn{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}
+.qe .qbtn .btn{padding:4px 10px;font-size:12px}
+.c .edit-toggle{font-size:12px;color:var(--blue);background:none;border:0;cursor:pointer;padding:0}
+.c .edit-toggle:focus-visible{outline:2px solid var(--orange)}
+.alerts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.alert{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;background:var(--red-soft);color:var(--red)}
+.alert.good{background:var(--green-soft);color:var(--green)}
+.ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:14px 16px}
+.ov .c{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;border-left:5px solid var(--blue)}
+.ov .c.amz{border-left-color:var(--navy)} .ov .c.tt{border-left-color:var(--blue)} .ov .c.pm{border-left-color:var(--orange)}
+.ov .c .n{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ov .c .n b{font-size:15px}
+.ov .c .n span{font-size:12px;color:var(--muted)}
+.ov .c .big{font-size:26px;font-weight:900;line-height:1.1}
+.ov .c .big small{font-size:12px;font-weight:500;color:var(--muted);margin-left:6px}
+.bar{position:relative;height:10px;border-radius:5px;background:var(--paper);overflow:hidden;border:1px solid var(--line)}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--blue)}
+.bar i.warn{background:var(--red)} .bar i.good{background:var(--green)} .bar i.pm{background:var(--orange)}
+.bar b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.7}
+.ov .c .m{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.ov .c .m strong{color:var(--ink)}
+.ov .c .row2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+details.block summary{list-style:none;cursor:pointer;font-size:16px;font-weight:700;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+details.block summary small{font-weight:400;color:var(--muted);font-size:13px}
+details.block summary::after{content:'펼치기';font-size:12px;color:var(--blue);font-weight:500}
+details.block[open] summary::after{content:'접기'}
+details.block[open] summary{border-bottom:1px solid var(--line)}
+details.block summary:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
+@media print{details.block{display:block} details.block:not([open])>*:not(summary){display:block}}
+@media (max-width:640px){ main{padding:14px 12px 60px} .kpi .v{font-size:24px} th,td{padding:7px 8px} }
+@media print{ .top,.toolbar,.tabs{display:none!important} body{background:#fff} main{padding:0;max-width:none} section[hidden]{display:block!important} .block{break-inside:avoid;border-color:#bbb} .scroll{overflow:visible} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="row">
+    <div class="brand"><h1>Dr.Reju-All 매출·광고 현황</h1><span>아마존 · 틱톡샵 · 퍼포먼스 마케팅 — 국가별 · 단위 천원</span></div>
+    <div class="datebar">
+      <label for="asof">기준일</label><input type="date" id="asof">
+      <button class="btn" id="btn-today" type="button" style="background:#fff;color:#1A2233;border-color:#fff">오늘</button>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="report">매출보고</button>
+    <button role="tab" aria-selected="false" data-tab="daily">일일입력</button>
+    <button role="tab" aria-selected="false" data-tab="pm">퍼포먼스입력</button>
+    <button role="tab" aria-selected="false" data-tab="plan">월별계획</button>
+    <button role="tab" aria-selected="false" data-tab="settings">설정</button>
+  </nav>
+</header>
+
+<main>
+<!-- ================= REPORT ================= -->
+<section id="tab-report">
+  <div class="toolbar">
+    <span class="note" id="report-meta"></span>
+    <span class="grow"></span>
+    <button class="btn" type="button" onclick="window.print()">인쇄 / PDF</button>
+    <button class="btn" type="button" id="btn-export">백업 내보내기 (JSON)</button>
+    <label class="btn" for="file-import" style="display:inline-block">백업 불러오기</label><input type="file" id="file-import" accept="application/json" hidden>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="alerts" id="alerts"></div>
+
+  <div class="split">
+    <div class="block">
+      <h2>아마존 — 국가별 <small>막대 = MTD 진척, 세로선 = 오늘까지 기대 페이스</small></h2>
+      <div class="ov" id="ov-amz"></div>
+    </div>
+    <div class="block">
+      <h2>틱톡샵 — 국가별 <small>막대 = MTD 진척, 세로선 = 기대 페이스</small></h2>
+      <div class="ov" id="ov-tt"></div>
+    </div>
+  </div>
+  <div class="block">
+    <h2>퍼포먼스 마케팅 — 플랫폼·국가별 <small>막대 = 예산 소진율, 세로선 = 경과일 비율</small></h2>
+    <div class="ov" id="ov-pm"></div>
+  </div>
+
+  <details class="block">
+    <summary>상세 표 — 아마존 · 틱톡샵 <small>합/불: 광고비율 채널 상한 초과 → 불합격, MTD 진척율 100% 미만 → 불합격</small></summary>
+    <div class="scroll" id="shop-table"></div>
+  </details>
+
+  <details class="block">
+    <summary>상세 표 — 퍼포먼스 마케팅 <small>합/불: ROAS 하한 미달 → 불합격 · 소진율은 경과일 비율의 110% 초과 시 빨강</small></summary>
+    <div class="scroll" id="pm-table"></div>
+  </details>
+
+  <details class="block">
+    <summary>월별 계획 vs 실적 <small id="year-label"></small></summary>
+    <div class="scroll" id="month-table"></div>
+  </details>
+</section>
+
+<!-- ================= DAILY LOG ================= -->
+<section id="tab-daily" hidden>
+  <div class="block">
+    <h2>일일 매출/광고 입력 <small>채널·국가별 하루 1행 · 현지통화로 입력 → 환율 자동 적용. 아마존 '광고매출'=PPC 귀속, 틱톡샵 '광고매출'=GMV Max/Spark 귀속, '어필리에이트'=크리에이터 귀속 GMV</small></h2>
+    <form class="grid-form" id="daily-form">
+      <label>날짜<input type="date" name="date" required></label>
+      <label>채널<select name="ch"><option>아마존</option><option>틱톡샵</option></select></label>
+      <label>국가<select name="ct"></select></label>
+      <label>총매출 (현지)<input type="number" step="0.01" name="sales" required></label>
+      <label>광고비 (현지)<input type="number" step="0.01" name="ad"></label>
+      <label>주문수<input type="number" step="1" name="orders"></label>
+      <label>광고매출 (현지)<input type="number" step="0.01" name="adrev"></label>
+      <label>어필리에이트 매출 (현지)<input type="number" step="0.01" name="aff"></label>
+      <label>비고<input type="text" name="memo"></label>
+      <button class="btn primary act" type="submit">행 추가</button>
+    </form>
+  </div>
+  <div class="toolbar">
+    <span class="note" id="daily-count"></span><span class="grow"></span>
+    <button class="btn" type="button" id="btn-daily-csv">CSV 내보내기</button>
+    <label class="btn" for="daily-csv-in" style="display:inline-block">CSV 불러오기</label><input type="file" id="daily-csv-in" accept=".csv,text/csv" hidden>
+    <button class="btn danger" type="button" id="btn-daily-clear">예시 데이터 삭제</button>
+  </div>
+  <div class="block"><div class="scroll" id="daily-table"></div></div>
+</section>
+
+<!-- ================= PM LOG ================= -->
+<section id="tab-pm" hidden>
+  <div class="block">
+    <h2>퍼포먼스 마케팅 일일 입력 <small>플랫폼·국가별 하루 1행 · 전환매출은 플랫폼 귀속 기준으로 팀 기준 통일</small></h2>
+    <form class="grid-form" id="pm-form">
+      <label>날짜<input type="date" name="date" required></label>
+      <label>플랫폼<select name="pl"><option>Meta</option><option>Google</option><option>TikTok Ads</option></select></label>
+      <label>국가<select name="ct"></select></label>
+      <label>지출 (현지)<input type="number" step="0.01" name="spend" required></label>
+      <label>노출<input type="number" step="1" name="imp"></label>
+      <label>클릭<input type="number" step="1" name="clk"></label>
+      <label>전환수<input type="number" step="1" name="cv"></label>
+      <label>전환매출 (현지)<input type="number" step="0.01" name="rev"></label>
+      <label>캠페인/비고<input type="text" name="memo"></label>
+      <button class="btn primary act" type="submit">행 추가</button>
+    </form>
+  </div>
+  <div class="toolbar">
+    <span class="note" id="pm-count"></span><span class="grow"></span>
+    <button class="btn" type="button" id="btn-pm-csv">CSV 내보내기</button>
+    <label class="btn" for="pm-csv-in" style="display:inline-block">CSV 불러오기</label><input type="file" id="pm-csv-in" accept=".csv,text/csv" hidden>
+  </div>
+  <div class="block"><div class="scroll" id="pm-log-table"></div></div>
+</section>
+
+<!-- ================= PLAN ================= -->
+<section id="tab-plan" hidden>
+  <div class="block">
+    <h2>월별 매출 계획 (천원) <small>노란 칸에 입력하면 즉시 저장</small></h2>
+    <div class="scroll" id="plan-table"></div>
+  </div>
+  <div class="block">
+    <h2>퍼포먼스 마케팅 월 예산 (천원)</h2>
+    <div class="scroll" id="budget-table"></div>
+  </div>
+</section>
+
+<!-- ================= SETTINGS ================= -->
+<section id="tab-settings" hidden>
+  <div class="block">
+    <h2>환율 (1 현지통화 = KRW) <small>매주 갱신 권장</small></h2>
+    <div class="scroll" id="fx-table"></div>
+  </div>
+  <div class="block">
+    <h2>합/불 기준</h2>
+    <div class="scroll" id="thr-table"></div>
+  </div>
+  <div class="block">
+    <h2>담당자</h2>
+    <div class="scroll" id="owner-table"></div>
+  </div>
+  <div class="block">
+    <h2>데이터</h2>
+    <div class="legend">
+      <span>이 페이지는 입력 데이터를 <b>이 브라우저에만</b> 저장합니다 (다른 PC/사람과 공유되지 않음). 팀과 공유하려면 매출보고 탭의 <b>백업 내보내기</b>로 JSON을 주고받거나, 일일입력 CSV를 교환하세요.</span>
+      <span>처음 열면 예시 데이터(9/27–28 이틀치)가 들어 있습니다. 일일입력 탭의 '예시 데이터 삭제'로 지우고 시작하세요.</span>
+      <span style="margin-top:6px"><button class="btn danger" type="button" id="btn-reset">모든 데이터 초기화 (예시로 되돌리기)</button></span>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+const KEY='drrejuall-report-v1';
+const COUNTRIES=[['미국','USD',1380],['캐나다','CAD',1000],['영국','GBP',1800],['호주','AUD',900],['중동(UAE)','AED',375]];
+const SHOP_ROWS=[['아마존','미국'],['아마존','캐나다'],['아마존','영국'],['아마존','호주'],['아마존','중동(UAE)'],['틱톡샵','미국'],['틱톡샵','영국']];
+const PM_ROWS=[['Meta','미국'],['Meta','영국'],['Google','미국'],['Google','영국'],['TikTok Ads','미국'],['TikTok Ads','영국']];
+const CHANNELS=['아마존','틱톡샵'], PLATFORMS=['Meta','Google','TikTok Ads'];
+const MONTHS=[...Array(12).keys()].map(i=>i+1);
+
+function defaults(){
+  const plan={};  const EX={'아마존|미국':120000,'아마존|캐나다':8000,'아마존|영국':15000,'아마존|호주':6000,'아마존|중동(UAE)':4000,'틱톡샵|미국':90000,'틱톡샵|영국':25000};
+  for(const k in EX) plan[k]=MONTHS.map(()=>EX[k]);
+  const budget={}; const EB={'Meta|미국':12000,'Meta|영국':4000,'Google|미국':8000,'Google|영국':2500,'TikTok Ads|미국':10000,'TikTok Ads|영국':3000};
+  for(const k in EB) budget[k]=MONTHS.map(()=>EB[k]);
+  const fx={}; COUNTRIES.forEach(c=>fx[c[0]]=c[2]);
+  const owners={'전체|':'온기철','아마존|Subtotal':'온기철','틱톡샵|Subtotal':'온기철','틱톡샵|미국':'김세원','틱톡샵|영국':'왕지윤','PM 전체|':'온기철'};
+  SHOP_ROWS.filter(r=>r[0]==='아마존').forEach(r=>owners[r.join('|')]='온기철');
+  PM_ROWS.forEach(r=>owners[r.join('|')]='온기철'); PLATFORMS.forEach(p=>owners[p+'|Subtotal']='온기철');
+  const EXD={'아마존|미국':[3200,480,95,1100,null],'아마존|캐나다':[260,40,9,90,null],'아마존|영국':[310,50,12,100,null],'아마존|호주':[220,30,7,70,null],'아마존|중동(UAE)':[400,60,8,130,null],'틱톡샵|미국':[2400,520,80,900,1500],'틱톡샵|영국':[520,120,22,180,330]};
+  const daily=[];
+  for(const d of ['2026-09-27','2026-09-28']){ const m=d.endsWith('27')?1:1.08; for(const k in EXD){ const [ch,ct]=k.split('|'); const v=EXD[k]; daily.push({date:d,ch,ct,sales:+(v[0]*m).toFixed(2),ad:+(v[1]*m).toFixed(2),orders:Math.floor(v[2]*m),adrev:+(v[3]*m).toFixed(2),aff:v[4]==null?null:+(v[4]*m).toFixed(2),memo:'예시'}); } }
+  const EXP={'Meta|미국':[350,42000,900,28,1050],'Meta|영국':[110,15000,320,9,300],'Google|미국':[240,18000,700,22,900],'Google|영국':[70,6000,210,6,190],'TikTok Ads|미국':[300,60000,1100,20,700],'TikTok Ads|영국':[90,20000,380,6,190]};
+  const pm=[];
+  for(const d of ['2026-09-27','2026-09-28']){ for(const k in EXP){ const [pl,ct]=k.split('|'); const v=EXP[k]; pm.push({date:d,pl,ct,spend:v[0],imp:v[1],clk:v[2],cv:v[3],rev:v[4],memo:'예시'}); } }
+  return {asof:'2026-09-28',fx,thr:{'전체':0.20,'아마존':0.15,'틱톡샵':0.25},roasMin:2.0,owners,plan,budget,daily,pm};
+}
+let S; try{ S=JSON.parse(localStorage.getItem(KEY)); }catch(e){ S=null; }
+if(!S||!S.daily){ S=defaults(); }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ console.warn('save failed',e); } }
+
+// ---------- helpers ----------
+const $=s=>document.querySelector(s);
+const fmt=(n,d=0)=>(n==null||isNaN(n)||n===''?'-':Number(n).toLocaleString('ko-KR',{minimumFractionDigits:d,maximumFractionDigits:d}));
+const pct=(n,d=1)=>(n==null||!isFinite(n)?'-':(n*100).toFixed(d)+'%');
+const cur=ct=>(COUNTRIES.find(c=>c[0]===ct)||[])[1]||'';
+const rate=ct=>Number(S.fx[ct]||0);
+const krw=(v,ct)=>(v==null||v===''?0:Number(v)*rate(ct)/1000);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function dateParts(){ const d=new Date(S.asof+'T00:00:00'); const y=d.getFullYear(), m=d.getMonth()+1; const mdays=new Date(y,m,0).getDate(); const edays=d.getDate(); const mstart=`${y}-${String(m).padStart(2,'0')}-01`; const pm=m===1?12:m-1, py=m===1?y-1:y; const pmstart=`${py}-${String(pm).padStart(2,'0')}-01`; const pmdays=new Date(py,pm,0).getDate(); const yest=new Date(d); yest.setDate(d.getDate()-1); const yst=yest.toISOString().slice(0,10); return {y,m,mdays,edays,mstart,pmstart,pmdays,yst}; }
+function chip(ok){ return ok==null?'':`<span class="chip ${ok?'ok':'ng'}">${ok?'합격':'불합격'}</span>`; }
+function sumIf(rows,pred,f){ let s=0; for(const r of rows) if(pred(r)) s+=f(r)||0; return s; }
+function inMonth(date,y,m){ return date && date.startsWith(`${y}-${String(m).padStart(2,'0')}`); }
+
+// ---------- tabs ----------
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b)); 
+  ['report','daily','pm','plan','settings'].forEach(t=>$('#tab-'+t).hidden=(t!==b.dataset.tab));
+}));
+$('#asof').value=S.asof; $('#asof').addEventListener('change',e=>{ S.asof=e.target.value; save(); render(); });
+$('#btn-today').addEventListener('click',()=>{ S.asof=new Date().toISOString().slice(0,10); $('#asof').value=S.asof; save(); render(); });
+
+// ---------- report ----------
+function shopMetrics(ch,ct){
+  const D=dateParts(); const rows=S.daily; const P=r=>(!ch||r.ch===ch)&&(!ct||r.ct===ct);
+  const today=r=>r.date===S.asof, yest=r=>r.date===D.yst, mtd=r=>r.date>=D.mstart&&r.date<=S.asof, prev=r=>r.date>=D.pmstart&&r.date<D.mstart;
+  const K=r=>krw(r.sales,r.ct), L=r=>krw(r.ad,r.ct), M=r=>krw(r.adrev,r.ct), N=r=>krw(r.aff,r.ct);
+  const key=ch+'|'+ct; let plan=0;
+  if(ch&&ct) plan=(S.plan[key]||[])[D.m-1]||0; else if(ch) plan=SHOP_ROWS.filter(r=>r[0]===ch).reduce((a,r)=>a+((S.plan[r.join('|')]||[])[D.m-1]||0),0); else plan=SHOP_ROWS.reduce((a,r)=>a+((S.plan[r.join('|')]||[])[D.m-1]||0),0);
+  const goal=plan/D.mdays;
+  const o={plan,goal,
+    yst:sumIf(rows,r=>P(r)&&yest(r),K), todayLoc:(ch&&ct)?sumIf(rows,r=>P(r)&&today(r),r=>+r.sales||0):null, today:sumIf(rows,r=>P(r)&&today(r),K), todayAd:sumIf(rows,r=>P(r)&&today(r),L),
+    mtd:sumIf(rows,r=>P(r)&&mtd(r),K), mtdAd:sumIf(rows,r=>P(r)&&mtd(r),L), orders:sumIf(rows,r=>P(r)&&mtd(r),r=>+r.orders||0), adrev:sumIf(rows,r=>P(r)&&mtd(r),M), aff:sumIf(rows,r=>P(r)&&mtd(r),N), prev:sumIf(rows,r=>P(r)&&prev(r),K)};
+  o.goalRatio=goal?o.today/goal:null; o.todayAdRatio=o.today?o.todayAd/o.today:null; o.prog=goal?o.mtd/(goal*D.edays):null; o.mtdAdRatio=o.mtd?o.mtdAd/o.mtd:null;
+  o.forecast=o.mtd/D.edays*D.mdays; o.forecastRatio=plan?o.forecast/plan:null; o.aov=o.orders?o.mtd/o.orders:null; o.adShare=o.mtd?o.adrev/o.mtd:null; o.affShare=o.mtd?o.aff/o.mtd:null;
+  o.prevAvg=o.prev/D.pmdays; o.mtdAvg=o.mtd/D.edays; o.mom=o.prevAvg?o.mtdAvg/o.prevAvg:null;
+  const thr=S.thr[ch||'전체']; o.todayPass=o.todayAdRatio==null?null:o.todayAdRatio<=thr; o.progPass=o.prog==null?null:o.prog>=1; o.mtdPass=o.mtdAdRatio==null?null:o.mtdAdRatio<=thr;
+  o.months=MONTHS.map(m=>{ let p=0; if(ch&&ct) p=(S.plan[key]||[])[m-1]||0; else if(ch) p=SHOP_ROWS.filter(r=>r[0]===ch).reduce((a,r)=>a+((S.plan[r.join('|')]||[])[m-1]||0),0); else p=SHOP_ROWS.reduce((a,r)=>a+((S.plan[r.join('|')]||[])[m-1]||0),0); const a=sumIf(rows,r=>P(r)&&inMonth(r.date,D.y,m),K); return {p,a}; });
+  return o;
+}
+function pmMetrics(pl,ct){
+  const D=dateParts(); const rows=S.pm; const P=r=>(!pl||r.pl===pl)&&(!ct||r.ct===ct);
+  const today=r=>r.date===S.asof, mtd=r=>r.date>=D.mstart&&r.date<=S.asof; const K=r=>krw(r.spend,r.ct), L=r=>krw(r.rev,r.ct);
+  const key=pl+'|'+ct; let bud=0; if(pl&&ct) bud=(S.budget[key]||[])[D.m-1]||0; else if(pl) bud=PM_ROWS.filter(r=>r[0]===pl).reduce((a,r)=>a+((S.budget[r.join('|')]||[])[D.m-1]||0),0); else bud=PM_ROWS.reduce((a,r)=>a+((S.budget[r.join('|')]||[])[D.m-1]||0),0);
+  const o={bud,dayBud:bud/D.mdays, todayLoc:(pl&&ct)?sumIf(rows,r=>P(r)&&today(r),r=>+r.spend||0):null, today:sumIf(rows,r=>P(r)&&today(r),K), todayRev:sumIf(rows,r=>P(r)&&today(r),L), mtd:sumIf(rows,r=>P(r)&&mtd(r),K), imp:sumIf(rows,r=>P(r)&&mtd(r),r=>+r.imp||0), clk:sumIf(rows,r=>P(r)&&mtd(r),r=>+r.clk||0), cv:sumIf(rows,r=>P(r)&&mtd(r),r=>+r.cv||0), rev:sumIf(rows,r=>P(r)&&mtd(r),L)};
+  o.todayRoas=o.today?o.todayRev/o.today:null; o.burn=bud?o.mtd/bud:null; o.ctr=o.imp?o.clk/o.imp:null; o.cpc=o.clk?o.mtd/o.clk:null; o.cpa=o.cv?o.mtd/o.cv:null; o.roas=o.mtd?o.rev/o.mtd:null; o.pass=o.roas==null?null:o.roas>=S.roasMin; o.forecast=o.mtd/D.edays*D.mdays; o.fRatio=bud?o.forecast/bud:null; o.burnHot=o.burn!=null&&o.burn>D.edays/D.mdays*1.1;
+  return o;
+}
+function owner(a,b){ return S.owners[a+'|'+(b||'')]||''; }
+function renderReport(){
+  const D=dateParts();
+  $('#report-meta').textContent=`기준일 ${S.asof} · 월간일수 ${D.mdays} · 경과일수 ${D.edays} · 환율 설정 탭 참조`;
+  const T=shopMetrics(null,null), PM=pmMetrics(null,null);
+  $('#kpis').innerHTML=[
+    ['오늘 매출',fmt(T.today),`일 GOAL ${fmt(T.goal)} · <b class="${T.goalRatio>=1?'pos':'neg'}">${pct(T.goalRatio,0)}</b>`],
+    ['당월 누계 (MTD)',fmt(T.mtd),`계획 ${fmt(T.plan)} · 진척 <b class="${T.prog>=1?'pos':'neg'}">${pct(T.prog)}</b>`],
+    ['월말 예상 매출',fmt(T.forecast),`계획 달성 예상 ${pct(T.forecastRatio,0)}`],
+    ['MTD 광고비율',pct(T.mtdAdRatio),`기준 ${pct(S.thr['전체'],0)} ${chip(T.mtdPass)}`],
+    ['PM 지출 (MTD)',fmt(PM.mtd),`예산 ${fmt(PM.bud)} · 소진율 ${pct(PM.burn)}`],
+    ['PM ROAS (MTD)',PM.roas==null?'-':PM.roas.toFixed(2)+'x',`하한 ${S.roasMin.toFixed(1)}x ${chip(PM.pass)}`]
+  ].map(k=>`<div class="kpi"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
+
+  // ---- alerts + overview cards ----
+  const pace=D.edays/D.mdays; const alerts=[];
+  const findD=(ch,ct)=>S.daily.find(r=>r.date===S.asof&&r.ch===ch&&r.ct===ct);
+  const findP=(pl,ct)=>S.pm.find(r=>r.date===S.asof&&r.pl===pl&&r.ct===ct);
+  const qeShop=(a,b)=>{ const r=findD(a,b)||{}; const F=(k,l)=>`<label>${l}<input type="number" step="0.01" data-q="${k}" value="${r[k]??''}"></label>`;
+    return `<form class="qe" hidden data-kind="shop" data-a="${a}" data-b="${b}">${F('sales','총매출('+cur(b)+')')}${F('ad','광고비')}${F('orders','주문수')}${F('adrev','광고매출')}${a==='틱톡샵'?F('aff','어필리에이트'):''}<div class="qbtn"><span class="k" style="flex:1;font-size:11px;align-self:center">${S.asof} 기준 · 기존 행이 있으면 덮어씀</span><button class="btn primary" type="submit">저장</button></div></form>`; };
+  const qePm=(a,b)=>{ const r=findP(a,b)||{}; const F=(k,l)=>`<label>${l}<input type="number" step="0.01" data-q="${k}" value="${r[k]??''}"></label>`;
+    return `<form class="qe" hidden data-kind="pm" data-a="${a}" data-b="${b}">${F('spend','지출('+cur(b)+')')}${F('imp','노출')}${F('clk','클릭')}${F('cv','전환수')}${F('rev','전환매출')}<div class="qbtn"><span class="k" style="flex:1;font-size:11px;align-self:center">${S.asof} 기준</span><button class="btn primary" type="submit">저장</button></div></form>`; };
+  const shopCard=(a,b,cls)=>{ const m=shopMetrics(a,b); const paceRatio=m.plan?m.mtd/m.plan:0; const w=Math.min(100,paceRatio*100); const behind=m.prog!=null&&m.prog<1; const adBad=m.mtdPass===false;
+    if(behind) alerts.push(`${a} ${b} 진척 ${pct(m.prog,0)}`); if(adBad) alerts.push(`${a} ${b} 광고비율 ${pct(m.mtdAdRatio)} (상한 ${pct(S.thr[a],0)})`);
+    return `<div class="c ${cls}"><div class="n"><b>${b} <span class="k" style="font-weight:400">${cur(b)}</span></b><span>${esc(owner(a,b))} · <button type="button" class="edit-toggle">${findD(a,b)?'오늘 수정':'오늘 입력'}</button></span></div>
+      <div class="big">${fmt(m.today)}<small>오늘 · 목표 대비 <span class="${m.goalRatio>=1?'pos':'neg'}">${pct(m.goalRatio,0)}</span></small></div>
+      <div class="bar" title="MTD ${fmt(m.mtd)} / 계획 ${fmt(m.plan)}"><i class="${behind?'warn':'good'}" style="width:${w}%"></i><b style="left:${pace*100}%"></b></div>
+      <div class="m"><span>MTD <strong>${fmt(m.mtd)}</strong> / ${fmt(m.plan)}</span><span>진척 <strong class="${behind?'neg':'pos'}">${pct(m.prog,0)}</strong></span></div>
+      <div class="row2"><span>광고비율 ${pct(m.mtdAdRatio)}</span>${chip(m.mtdPass)}<span>·</span><span>월말 예상 ${pct(m.forecastRatio,0)}</span>${a==='틱톡샵'?`<span>·</span><span>어필 ${pct(m.affShare,0)}</span>`:''}</div>${qeShop(a,b)}</div>`; };
+  $('#ov-amz').innerHTML=SHOP_ROWS.filter(r=>r[0]==='아마존').map(r=>shopCard(r[0],r[1],'amz')).join('');
+  $('#ov-tt').innerHTML=SHOP_ROWS.filter(r=>r[0]==='틱톡샵').map(r=>shopCard(r[0],r[1],'tt')).join('');
+  $('#ov-pm').innerHTML=PM_ROWS.map(r=>{ const m=pmMetrics(r[0],r[1]); const w=Math.min(100,(m.burn||0)*100); if(m.pass===false) alerts.push(`${r[0]} ${r[1]} ROAS ${m.roas.toFixed(2)}x (하한 ${S.roasMin.toFixed(1)}x)`); if(m.burnHot) alerts.push(`${r[0]} ${r[1]} 예산 과소진 ${pct(m.burn,0)}`);
+    return `<div class="c pm"><div class="n"><b>${r[0]} · ${r[1]}</b><span>${esc(owner(r[0],r[1]))} · <button type="button" class="edit-toggle">${findP(r[0],r[1])?'오늘 수정':'오늘 입력'}</button></span></div>
+      <div class="big">${m.roas==null?'-':m.roas.toFixed(2)+'x'}<small>ROAS (MTD) ${chip(m.pass)}</small></div>
+      <div class="bar" title="지출 ${fmt(m.mtd)} / 예산 ${fmt(m.bud)}"><i class="${m.burnHot?'warn':'pm'}" style="width:${w}%"></i><b style="left:${pace*100}%"></b></div>
+      <div class="m"><span>지출 <strong>${fmt(m.mtd)}</strong> / ${fmt(m.bud)}</span><span>소진 <strong class="${m.burnHot?'neg':''}">${pct(m.burn,0)}</strong></span></div>
+      <div class="row2"><span>전환매출 ${fmt(m.rev)}</span><span>·</span><span>CPA ${fmt(m.cpa,1)}</span><span>·</span><span>오늘 ${fmt(m.today)} (${m.todayRoas==null?'-':m.todayRoas.toFixed(2)+'x'})</span></div>${qePm(r[0],r[1])}</div>`; }).join('');
+  $('#alerts').innerHTML=alerts.length?alerts.map(a=>`<span class="alert">⚠ ${esc(a)}</span>`).join(''):'<span class="alert good">✓ 모든 항목 합격 — 기준 이내</span>';
+
+  const layout=[['전체','','total'],['아마존','Subtotal','ch'],...SHOP_ROWS.filter(r=>r[0]==='아마존').map(r=>[r[0],r[1],'ct']),['틱톡샵','Subtotal','ch'],...SHOP_ROWS.filter(r=>r[0]==='틱톡샵').map(r=>[r[0],r[1],'ct'])];
+  let h=`<table><thead><tr><th class="l" rowspan="2">채널</th><th class="l" rowspan="2">국가</th><th class="l" rowspan="2">담당자</th><th rowspan="2">월 계획</th><th rowspan="2">일 GOAL</th><th rowspan="2">어제</th><th class="grp" colspan="6">오늘</th><th class="grp" colspan="6">당월 누계 (MTD)</th><th class="grp" colspan="2">월말 예상</th><th class="grp" colspan="2">주문</th><th class="grp" colspan="2">광고매출</th><th class="grp" colspan="2">어필리에이트</th><th class="grp" colspan="3">전월 대비</th></tr>
+  <tr><th>매출(현지)</th><th>매출</th><th>목표 대비</th><th>광고비</th><th>광고비율</th><th>합/불</th><th>매출</th><th>진척율</th><th>합/불</th><th>광고비</th><th>광고비율</th><th>합/불</th><th>예상 매출</th><th>달성 예상</th><th>MTD 주문</th><th>AOV</th><th>MTD</th><th>비중</th><th>MTD</th><th>비중</th><th>전월</th><th>전월 일평균</th><th>MTD 일평균/전월</th></tr></thead><tbody>`;
+  for(const [a,b,lv] of layout){ const m=shopMetrics(lv==='total'?null:a, lv==='ct'?b:null); const cls=lv==='total'?'tot':lv==='ch'?'sub':'';
+    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}${lv==='ct'?` <span class="k">(${cur(b)})</span>`:''}</td><td class="l">${esc(owner(a,b))}</td><td>${fmt(m.plan)}</td><td>${fmt(m.goal)}</td><td>${fmt(m.yst)}</td><td>${m.todayLoc==null?'':fmt(m.todayLoc,2)}</td><td>${fmt(m.today)}</td><td class="${m.goalRatio>=1?'pos':'neg'}">${pct(m.goalRatio,0)}</td><td>${fmt(m.todayAd)}</td><td>${pct(m.todayAdRatio)}</td><td>${chip(m.todayPass)}</td><td>${fmt(m.mtd)}</td><td class="${m.prog>=1?'pos':'neg'}">${pct(m.prog)}</td><td>${chip(m.progPass)}</td><td>${fmt(m.mtdAd)}</td><td>${pct(m.mtdAdRatio)}</td><td>${chip(m.mtdPass)}</td><td>${fmt(m.forecast)}</td><td>${pct(m.forecastRatio,0)}</td><td>${fmt(m.orders)}</td><td>${fmt(m.aov,1)}</td><td>${fmt(m.adrev)}</td><td>${pct(m.adShare)}</td><td>${a==='아마존'?'-':fmt(m.aff)}</td><td>${a==='아마존'?'-':pct(m.affShare)}</td><td>${fmt(m.prev)}</td><td>${fmt(m.prevAvg)}</td><td>${pct(m.mom,0)}</td></tr>`; }
+  $('#shop-table').innerHTML=h+'</tbody></table>';
+
+  const pl=[['전체','','total']]; PLATFORMS.forEach(p=>{ pl.push([p,'Subtotal','ch']); PM_ROWS.filter(r=>r[0]===p).forEach(r=>pl.push([r[0],r[1],'ct'])); });
+  h=`<table><thead><tr><th class="l" rowspan="2">플랫폼</th><th class="l" rowspan="2">국가</th><th class="l" rowspan="2">담당자</th><th rowspan="2">월 예산</th><th rowspan="2">일 예산</th><th class="grp" colspan="4">오늘</th><th class="grp" colspan="11">당월 누계 (MTD)</th><th class="grp" colspan="2">월말 예상</th></tr><tr><th>지출(현지)</th><th>지출</th><th>전환매출</th><th>ROAS</th><th>지출</th><th>소진율</th><th>노출</th><th>클릭</th><th>CTR</th><th>CPC</th><th>전환수</th><th>CPA</th><th>전환매출</th><th>ROAS</th><th>합/불</th><th>예상 지출</th><th>예산 대비</th></tr></thead><tbody>`;
+  for(const [a,b,lv] of pl){ const m=pmMetrics(lv==='total'?null:a, lv==='ct'?b:null); const cls=lv==='total'?'tot':lv==='ch'?'sub':''; const on=lv==='total'?owner('PM 전체',''):owner(a,b);
+    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}${lv==='ct'?` <span class="k">(${cur(b)})</span>`:''}</td><td class="l">${esc(on)}</td><td>${fmt(m.bud)}</td><td>${fmt(m.dayBud)}</td><td>${m.todayLoc==null?'':fmt(m.todayLoc,2)}</td><td>${fmt(m.today)}</td><td>${fmt(m.todayRev)}</td><td>${m.todayRoas==null?'-':m.todayRoas.toFixed(2)+'x'}</td><td>${fmt(m.mtd)}</td><td class="${m.burnHot?'neg':''}">${pct(m.burn)}</td><td>${fmt(m.imp)}</td><td>${fmt(m.clk)}</td><td>${pct(m.ctr,2)}</td><td>${fmt(m.cpc,2)}</td><td>${fmt(m.cv)}</td><td>${fmt(m.cpa,1)}</td><td>${fmt(m.rev)}</td><td>${m.roas==null?'-':m.roas.toFixed(2)+'x'}</td><td>${chip(m.pass)}</td><td>${fmt(m.forecast)}</td><td>${pct(m.fRatio,0)}</td></tr>`; }
+  $('#pm-table').innerHTML=h+'</tbody></table>';
+
+  $('#year-label').textContent=`${D.y}년 · 실적은 일일입력 합계 · 단위 천원`;
+  h=`<table><thead><tr><th class="l" rowspan="2">채널</th><th class="l" rowspan="2">국가</th>${MONTHS.map(m=>`<th class="grp" colspan="2">${m}월</th>`).join('')}<th class="grp" colspan="3">연간</th></tr><tr>${MONTHS.map(()=>'<th>계획</th><th>실적</th>').join('')}<th>계획</th><th>실적</th><th>달성율</th></tr></thead><tbody>`;
+  for(const [a,b,lv] of layout){ const m=shopMetrics(lv==='total'?null:a, lv==='ct'?b:null); const cls=lv==='total'?'tot':lv==='ch'?'sub':''; const yp=m.months.reduce((s,x)=>s+x.p,0), ya=m.months.reduce((s,x)=>s+x.a,0);
+    h+=`<tr class="${cls}"><td class="l">${a}</td><td class="l">${b}</td>${m.months.map(x=>`<td class="k">${fmt(x.p)}</td><td>${fmt(x.a)}</td>`).join('')}<td class="k">${fmt(yp)}</td><td>${fmt(ya)}</td><td>${pct(yp?ya/yp:null)}</td></tr>`; }
+  $('#month-table').innerHTML=h+'</tbody></table>';
+}
+
+// ---------- quick edit on report cards ----------
+$('#tab-report').addEventListener('click',e=>{ const t=e.target.closest('.edit-toggle'); if(!t) return; const f=t.closest('.c').querySelector('.qe'); f.hidden=!f.hidden; if(!f.hidden) f.querySelector('input').focus(); });
+$('#tab-report').addEventListener('submit',e=>{ const f=e.target.closest('form.qe'); if(!f) return; e.preventDefault();
+  const a=f.dataset.a,b=f.dataset.b; const vals={}; f.querySelectorAll('[data-q]').forEach(i=>vals[i.dataset.q]=num(i.value));
+  if(f.dataset.kind==='shop'){ let r=S.daily.find(x=>x.date===S.asof&&x.ch===a&&x.ct===b); if(!r){ r={date:S.asof,ch:a,ct:b,memo:''}; S.daily.push(r); } Object.assign(r,{sales:vals.sales,ad:vals.ad,orders:vals.orders,adrev:vals.adrev,aff:a==='틱톡샵'?vals.aff:null}); if(r.memo==='예시') r.memo=''; }
+  else { let r=S.pm.find(x=>x.date===S.asof&&x.pl===a&&x.ct===b); if(!r){ r={date:S.asof,pl:a,ct:b,memo:''}; S.pm.push(r); } Object.assign(r,{spend:vals.spend,imp:vals.imp,clk:vals.clk,cv:vals.cv,rev:vals.rev}); if(r.memo==='예시') r.memo=''; }
+  save(); render(); });
+
+// ---------- daily log ----------
+function fillCountry(sel){ sel.innerHTML=COUNTRIES.map(c=>`<option>${c[0]}</option>`).join(''); }
+fillCountry($('#daily-form select[name=ct]')); fillCountry($('#pm-form select[name=ct]'));
+$('#daily-form input[name=date]').value=S.asof; $('#pm-form input[name=date]').value=S.asof;
+function num(v){ return v===''||v==null?null:Number(v); }
+$('#daily-form').addEventListener('submit',e=>{ e.preventDefault(); const f=new FormData(e.target); S.daily.push({date:f.get('date'),ch:f.get('ch'),ct:f.get('ct'),sales:num(f.get('sales')),ad:num(f.get('ad')),orders:num(f.get('orders')),adrev:num(f.get('adrev')),aff:num(f.get('aff')),memo:f.get('memo')}); save(); render(); e.target.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value=''); });
+$('#pm-form').addEventListener('submit',e=>{ e.preventDefault(); const f=new FormData(e.target); S.pm.push({date:f.get('date'),pl:f.get('pl'),ct:f.get('ct'),spend:num(f.get('spend')),imp:num(f.get('imp')),clk:num(f.get('clk')),cv:num(f.get('cv')),rev:num(f.get('rev')),memo:f.get('memo')}); save(); render(); e.target.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value=''); });
+
+function renderDaily(){
+  const rows=S.daily.map((r,i)=>({...r,i})).sort((a,b)=>b.date.localeCompare(a.date)||a.ch.localeCompare(b.ch)||a.ct.localeCompare(b.ct));
+  $('#daily-count').textContent=`${rows.length}행`;
+  if(!rows.length){ $('#daily-table').innerHTML='<div class="empty">아직 입력이 없습니다. 위 폼으로 채널·국가별 하루 1행씩 추가하세요.</div>'; return; }
+  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">채널</th><th class="l">국가</th><th>통화</th><th>환율</th><th>총매출(현지)</th><th>광고비(현지)</th><th>주문수</th><th>광고매출(현지)</th><th>어필리에이트(현지)</th><th>총매출(천원)</th><th>광고비(천원)</th><th class="l">비고</th><th></th></tr></thead><tbody>';
+  for(const r of rows){ const F=(k,step='0.01')=>`<input type="number" step="${step}" value="${r[k]??''}" data-i="${r.i}" data-k="${k}">`;
+    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="ch">${CHANNELS.map(c=>`<option ${c===r.ch?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td class="k">${fmt(rate(r.ct),1)}</td><td>${F('sales')}</td><td>${F('ad')}</td><td>${F('orders','1')}</td><td>${F('adrev')}</td><td>${r.ch==='아마존'?'<span class="k">-</span>':F('aff')}</td><td>${fmt(krw(r.sales,r.ct))}</td><td>${fmt(krw(r.ad,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
+  $('#daily-table').innerHTML=h+'</tbody></table>';
+}
+$('#daily-table').addEventListener('change',e=>{ const t=e.target; if(t.dataset.k==null) return; const r=S.daily[+t.dataset.i]; r[t.dataset.k]=(t.type==='number')?num(t.value):t.value; save(); render(); });
+$('#daily-table').addEventListener('click',e=>{ const b=e.target.closest('[data-del]'); if(!b) return; S.daily.splice(+b.dataset.del,1); save(); render(); });
+$('#btn-daily-clear').addEventListener('click',()=>{ if(!confirm('비고가 "예시"인 행을 모두 삭제할까요?')) return; S.daily=S.daily.filter(r=>r.memo!=='예시'); S.pm=S.pm.filter(r=>r.memo!=='예시'); save(); render(); });
+
+function renderPmLog(){
+  const rows=S.pm.map((r,i)=>({...r,i})).sort((a,b)=>b.date.localeCompare(a.date)||a.pl.localeCompare(b.pl)||a.ct.localeCompare(b.ct));
+  $('#pm-count').textContent=`${rows.length}행`;
+  if(!rows.length){ $('#pm-log-table').innerHTML='<div class="empty">아직 입력이 없습니다.</div>'; return; }
+  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">플랫폼</th><th class="l">국가</th><th>통화</th><th>지출(현지)</th><th>노출</th><th>클릭</th><th>전환수</th><th>전환매출(현지)</th><th>지출(천원)</th><th>전환매출(천원)</th><th class="l">캠페인/비고</th><th></th></tr></thead><tbody>';
+  for(const r of rows){ const F=(k,step='0.01')=>`<input type="number" step="${step}" value="${r[k]??''}" data-i="${r.i}" data-k="${k}">`;
+    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="pl">${PLATFORMS.map(c=>`<option ${c===r.pl?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td>${F('spend')}</td><td>${F('imp','1')}</td><td>${F('clk','1')}</td><td>${F('cv','1')}</td><td>${F('rev')}</td><td>${fmt(krw(r.spend,r.ct))}</td><td>${fmt(krw(r.rev,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
+  $('#pm-log-table').innerHTML=h+'</tbody></table>';
+}
+$('#pm-log-table').addEventListener('change',e=>{ const t=e.target; if(t.dataset.k==null) return; const r=S.pm[+t.dataset.i]; r[t.dataset.k]=(t.type==='number')?num(t.value):t.value; save(); render(); });
+$('#pm-log-table').addEventListener('click',e=>{ const b=e.target.closest('[data-del]'); if(!b) return; S.pm.splice(+b.dataset.del,1); save(); render(); });
+
+// ---------- CSV ----------
+function toCSV(rows,cols){ const q=v=>`"${String(v??'').replace(/"/g,'""')}"`; return '\ufeff'+[cols.map(q).join(','),...rows.map(r=>cols.map(c=>q(r[c])).join(','))].join('\n'); }
+function parseCSV(text){ const lines=text.replace(/^\ufeff/,'').split(/\r?\n/).filter(l=>l.trim()); const parse=l=>{ const out=[]; let cur='',q=false; for(let i=0;i<l.length;i++){ const c=l[i]; if(q){ if(c==='"'&&l[i+1]==='"'){cur+='"';i++;} else if(c==='"') q=false; else cur+=c; } else { if(c==='"') q=true; else if(c===','){out.push(cur);cur='';} else cur+=c; } } out.push(cur); return out; }; const head=parse(lines[0]); return lines.slice(1).map(l=>{ const v=parse(l); const o={}; head.forEach((h,i)=>o[h.trim()]=v[i]); return o; }); }
+function download(name,text,type='text/csv'){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+const DCOLS=['date','ch','ct','sales','ad','orders','adrev','aff','memo'], PCOLS=['date','pl','ct','spend','imp','clk','cv','rev','memo'];
+$('#btn-daily-csv').addEventListener('click',()=>download('일일입력.csv',toCSV(S.daily,DCOLS)));
+$('#btn-pm-csv').addEventListener('click',()=>download('퍼포먼스입력.csv',toCSV(S.pm,PCOLS)));
+$('#daily-csv-in').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const rows=parseCSV(t).filter(r=>r.date&&r.ch&&r.ct).map(r=>({date:r.date,ch:r.ch,ct:r.ct,sales:num(r.sales),ad:num(r.ad),orders:num(r.orders),adrev:num(r.adrev),aff:num(r.aff),memo:r.memo||''})); S.daily.push(...rows); save(); render(); alert(rows.length+'행 추가'); }); e.target.value=''; });
+$('#pm-csv-in').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const rows=parseCSV(t).filter(r=>r.date&&r.pl&&r.ct).map(r=>({date:r.date,pl:r.pl,ct:r.ct,spend:num(r.spend),imp:num(r.imp),clk:num(r.clk),cv:num(r.cv),rev:num(r.rev),memo:r.memo||''})); S.pm.push(...rows); save(); render(); alert(rows.length+'행 추가'); }); e.target.value=''; });
+$('#btn-export').addEventListener('click',()=>download(`drrejuall-report-${S.asof}.json`,JSON.stringify(S,null,1),'application/json'));
+$('#file-import').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ try{ const o=JSON.parse(t); if(!o.daily||!o.plan) throw 0; S=o; save(); $('#asof').value=S.asof; render(); }catch(err){ alert('백업 파일 형식이 아닙니다.'); } }); e.target.value=''; });
+$('#btn-reset').addEventListener('click',()=>{ if(!confirm('모든 입력을 지우고 예시 데이터로 되돌릴까요?')) return; S=defaults(); save(); $('#asof').value=S.asof; render(); });
+
+// ---------- plan / budget / settings ----------
+function planTable(id,rows,store){
+  let h=`<table class="edit"><thead><tr><th class="l">채널</th><th class="l">국가</th>${MONTHS.map(m=>`<th>${m}월</th>`).join('')}<th>연간</th></tr></thead><tbody>`;
+  for(const r of rows){ const k=r.join('|'); const arr=store[k]||(store[k]=MONTHS.map(()=>0)); h+=`<tr><td class="l">${r[0]}</td><td class="l">${r[1]}</td>${arr.map((v,i)=>`<td><input type="number" step="1" value="${v}" data-k="${k}" data-m="${i}"></td>`).join('')}<td>${fmt(arr.reduce((a,b)=>a+(+b||0),0))}</td></tr>`; }
+  $(id).innerHTML=h+'</tbody></table>';
+}
+function renderPlan(){ planTable('#plan-table',SHOP_ROWS,S.plan); planTable('#budget-table',PM_ROWS,S.budget); }
+['#plan-table','#budget-table'].forEach((id,ix)=>$(id).addEventListener('change',e=>{ const t=e.target; if(t.dataset.k==null) return; (ix?S.budget:S.plan)[t.dataset.k][+t.dataset.m]=+t.value||0; save(); render(); }));
+function renderSettings(){
+  $('#fx-table').innerHTML=`<table class="edit"><thead><tr><th class="l">국가</th><th class="l">통화</th><th>환율 (KRW)</th></tr></thead><tbody>${COUNTRIES.map(c=>`<tr><td class="l">${c[0]}</td><td class="l">${c[1]}</td><td><input type="number" step="0.1" value="${S.fx[c[0]]}" data-fx="${c[0]}"></td></tr>`).join('')}</tbody></table>`;
+  $('#thr-table').innerHTML=`<table class="edit"><thead><tr><th class="l">항목</th><th>기준</th><th class="l">설명</th></tr></thead><tbody>${['전체','아마존','틱톡샵'].map(c=>`<tr><td class="l">${c} 광고비율 상한</td><td><input type="number" step="0.01" value="${S.thr[c]}" data-thr="${c}"></td><td class="l k">광고비 ÷ 매출이 이 값을 넘으면 불합격 (0.15 = 15%)</td></tr>`).join('')}<tr><td class="l">퍼포먼스마케팅 ROAS 하한</td><td><input type="number" step="0.1" value="${S.roasMin}" data-roas="1"></td><td class="l k">전환매출 ÷ 지출이 이 값 미만이면 불합격</td></tr></tbody></table>`;
+  const keys=Object.keys(S.owners);
+  $('#owner-table').innerHTML=`<table class="edit"><thead><tr><th class="l">채널/플랫폼</th><th class="l">국가</th><th class="l">담당자</th></tr></thead><tbody>${keys.map(k=>{ const [a,b]=k.split('|'); return `<tr><td class="l">${a}</td><td class="l">${b||'(전체)'}</td><td><input type="text" value="${esc(S.owners[k])}" data-own="${k}" style="text-align:left"></td></tr>`; }).join('')}</tbody></table>`;
+}
+$('#tab-settings').addEventListener('change',e=>{ const t=e.target; if(t.dataset.fx) S.fx[t.dataset.fx]=+t.value||0; else if(t.dataset.thr) S.thr[t.dataset.thr]=+t.value||0; else if(t.dataset.roas) S.roasMin=+t.value||0; else if(t.dataset.own!=null) S.owners[t.dataset.own]=t.value; else return; save(); render(); });
+
+function render(){ renderReport(); renderDaily(); renderPmLog(); renderPlan(); renderSettings(); }
+render();
+})();
+</script>
+</body>
+</html>
