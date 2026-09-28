@@ -10,11 +10,11 @@
 :root{
   --navy:#1B2A4A; --navy-2:#26385E; --paper:#F3F4F7; --card:#FFFFFF; --ink:#1A2233; --muted:#5B6678; --line:#DCE0E8;
   --blue:#2E75B6; --blue-soft:#E4EEF8; --orange:#E07A3F; --orange-soft:#FBE9DD; --green:#1E7F4F; --green-soft:#DFF3E7; --red:#C0392B; --red-soft:#FADEDB;
-  --input:#FFF6D6;
+  --input:#FFF6D6; --orange-ink:#9A4A1C;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --paper:#12182A; --card:#1B2340; --ink:#EEF1F7; --muted:#A5AFC4; --line:#2E3A5C; --blue-soft:#1F3358; --orange-soft:#4A2E1E; --green-soft:#183F2C; --red-soft:#4A2020; --input:#3A3418; --navy:#0F1830; --navy-2:#1B2340; } }
-:root[data-theme="dark"]{ --paper:#12182A; --card:#1B2340; --ink:#EEF1F7; --muted:#A5AFC4; --line:#2E3A5C; --blue-soft:#1F3358; --orange-soft:#4A2E1E; --green-soft:#183F2C; --red-soft:#4A2020; --input:#3A3418; --navy:#0F1830; --navy-2:#1B2340; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --paper:#12182A; --card:#1B2340; --ink:#EEF1F7; --muted:#A5AFC4; --line:#2E3A5C; --blue-soft:#1F3358; --orange-soft:#4A2E1E; --green-soft:#183F2C; --red-soft:#4A2020; --input:#3A3418; --navy:#0F1830; --navy-2:#1B2340; --orange-ink:#F3B48A; } }
+:root[data-theme="dark"]{ --paper:#12182A; --card:#1B2340; --ink:#EEF1F7; --muted:#A5AFC4; --line:#2E3A5C; --blue-soft:#1F3358; --orange-soft:#4A2E1E; --green-soft:#183F2C; --red-soft:#4A2020; --input:#3A3418; --navy:#0F1830; --navy-2:#1B2340; --orange-ink:#F3B48A; }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%}
@@ -75,6 +75,7 @@ table.edit td{padding:4px 6px}
 .legend{padding:12px 16px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 .empty{padding:28px 16px;text-align:center;color:var(--muted)}
 .qe{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:6px;padding-top:8px;border-top:1px dashed var(--line)}
+.qe[hidden]{display:none}
 .qe label{display:flex;flex-direction:column;font-size:11px;color:var(--muted)}
 .qe input{background:var(--input);border:1px solid var(--line);border-radius:5px;padding:4px 6px;text-align:right;min-width:0;color:var(--ink);font-size:13px}
 .qe .qbtn{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}
@@ -84,6 +85,9 @@ table.edit td{padding:4px 6px}
 .alerts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .alert{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;background:var(--red-soft);color:var(--red)}
 .alert.good{background:var(--green-soft);color:var(--green)}
+.alert.miss{background:var(--orange-soft);color:var(--orange-ink)}
+.sync{font-size:12px;color:#C9D2E3;white-space:nowrap}
+.sync.err{color:#FFB4A8;font-weight:700}
 .ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:14px 16px}
 .ov .c{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;border-left:5px solid var(--blue)}
 .ov .c.amz{border-left-color:var(--navy)} .ov .c.tt{border-left-color:var(--blue)} .ov .c.pm{border-left-color:var(--orange)}
@@ -120,6 +124,8 @@ details.block summary:focus-visible{outline:2px solid var(--orange);outline-offs
     <div class="datebar">
       <label for="asof">기준일</label><input type="date" id="asof">
       <button class="btn" id="btn-today" type="button" style="background:#fff;color:#1A2233;border-color:#fff">오늘</button>
+      <span class="sync" id="sync" role="status" hidden></span>
+      <button class="btn" id="btn-sync" type="button" hidden style="background:transparent;color:#F6F5F1;border-color:#5A6A8E">새로고침</button>
     </div>
   </div>
   <nav class="tabs" role="tablist">
@@ -255,9 +261,9 @@ details.block summary:focus-visible{outline:2px solid var(--orange);outline-offs
   <div class="block">
     <h2>데이터</h2>
     <div class="legend">
-      <span>이 페이지는 입력 데이터를 <b>이 브라우저에만</b> 저장합니다 (다른 PC/사람과 공유되지 않음). 팀과 공유하려면 매출보고 탭의 <b>백업 내보내기</b>로 JSON을 주고받거나, 일일입력 CSV를 교환하세요.</span>
-      <span>처음 열면 예시 데이터(9/27–28 이틀치)가 들어 있습니다. 일일입력 탭의 '예시 데이터 삭제'로 지우고 시작하세요.</span>
-      <span style="margin-top:6px"><button class="btn danger" type="button" id="btn-reset">모든 데이터 초기화 (예시로 되돌리기)</button></span>
+      <span id="data-note">이 페이지는 입력 데이터를 <b>이 브라우저에만</b> 저장합니다 (다른 PC/사람과 공유되지 않음). 팀과 공유하려면 매출보고 탭의 <b>백업 내보내기</b>로 JSON을 주고받거나, 일일입력 CSV를 교환하세요.</span>
+      <span id="data-note2">처음 열면 예시 데이터(9/27–28 이틀치)가 들어 있습니다. 일일입력 탭의 '예시 데이터 삭제'로 지우고 시작하세요.</span>
+      <span style="margin-top:6px" id="reset-wrap"><button class="btn danger" type="button" id="btn-reset">모든 데이터 초기화 (예시로 되돌리기)</button></span>
     </div>
   </div>
 </section>
@@ -290,10 +296,73 @@ function defaults(){
   for(const d of ['2026-09-27','2026-09-28']){ for(const k in EXP){ const [pl,ct]=k.split('|'); const v=EXP[k]; pm.push({date:d,pl,ct,spend:v[0],imp:v[1],clk:v[2],cv:v[3],rev:v[4],memo:'예시'}); } }
   return {unit:'만원',asof:'2026-09-28',fx,thr:{'전체':0.20,'아마존':0.15,'틱톡샵':0.25},roasMin:2.0,owners,plan,budget,daily,pm};
 }
-let S; try{ S=JSON.parse(localStorage.getItem(KEY)); }catch(e){ S=null; }
-if(!S||!S.daily){ S=defaults(); }
-if(S.unit!=='만원'){ for(const k in S.plan) S.plan[k]=S.plan[k].map(v=>Math.round(v/10)); for(const k in S.budget) S.budget[k]=S.budget[k].map(v=>Math.round(v/10)); S.unit='만원'; }
-function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ console.warn('save failed',e); } }
+// ---------- storage: Apps Script(구글 시트) 모드 / 로컬(localStorage) 모드 ----------
+const GAS=(typeof google==='object'&&google.script&&google.script.run)?google.script.run:null;
+const CKEY=GAS?'drrejuall-report-gas-v1':KEY;
+const DCOLS=['date','ch','ct','sales','ad','orders','adrev','aff','memo'], PCOLS=['date','pl','ct','spend','imp','clk','cv','rev','memo'];
+const DNUM=['sales','ad','orders','adrev','aff'], PNUM=['spend','imp','clk','cv','rev'];
+const DATA_KEYS=['unit','fx','thr','roasMin','owners','plan','budget','daily','pm'];
+function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+const todayStr=()=>ymd(new Date());
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function migrate(o){ if(o.unit!=='만원'){ for(const k in o.plan) o.plan[k]=o.plan[k].map(v=>Math.round(v/10)); for(const k in o.budget) o.budget[k]=o.budget[k].map(v=>Math.round(v/10)); o.unit='만원'; } return o; }
+function normRows(rows,nums){ for(const r of rows){ if(!r.id) r.id=uid(); for(const k of nums){ const v=r[k]; r[k]=(v===''||v==null||isNaN(v))?null:Number(v); } if(r.memo==null) r.memo=''; } }
+function norm(o){ normRows(o.daily,DNUM); normRows(o.pm,PNUM); }
+const dataOf=o=>{ const d={}; DATA_KEYS.forEach(k=>d[k]=o[k]); return JSON.parse(JSON.stringify(d)); };
+function blank(){ const d=defaults(); return {...d,asof:todayStr(),owners:{},plan:{},budget:{},daily:[],pm:[]}; }
+
+let S, BASE=null;   // BASE = 서버(시트)에 있다고 알고 있는 마지막 상태 → S와의 차이만 전송
+try{ const c=JSON.parse(localStorage.getItem(CKEY)); if(GAS){ if(c&&c.S){ S=c.S; BASE=c.BASE||null; } } else S=c; }catch(e){ S=null; }
+if(!S||!S.daily){ S=GAS?blank():defaults(); }
+migrate(S); norm(S);
+if(GAS) S.asof=todayStr();
+function persist(){ try{ localStorage.setItem(CKEY,JSON.stringify(GAS?{S,BASE}:S)); }catch(e){ console.warn('save failed',e); } }
+function save(){ norm(S); persist(); if(GAS) schedulePush(); }
+
+// ---------- sync (GAS 모드) ----------
+function diffOps(b,c){
+  const ops=[];
+  const cfg=o=>{ const f={unit:o.unit,roasMin:o.roasMin}; for(const k in o.fx||{}) f['fx.'+k]=o.fx[k]; for(const k in o.thr||{}) f['thr.'+k]=o.thr[k]; return f; };
+  const bc=cfg(b), cc=cfg(c); for(const k in cc) if(cc[k]!==bc[k]) ops.push({t:'config',key:k,value:cc[k]});
+  const bo=b.owners||{}, co=c.owners||{}; new Set([...Object.keys(bo),...Object.keys(co)]).forEach(k=>{ if((bo[k]||'')!==(co[k]||'')) ops.push({t:'owners',key:k,value:co[k]||''}); });
+  for(const kind of ['plan','budget']){ const B=b[kind]||{}, C=c[kind]||{}; new Set([...Object.keys(B),...Object.keys(C)]).forEach(k=>{ for(let m=0;m<12;m++){ const x=+((B[k]||[])[m])||0, y=+((C[k]||[])[m])||0; if(x!==y) ops.push({t:'plan',kind,key:k,m,value:y}); } }); }
+  for(const [t,cols] of [['daily',DCOLS],['pm',PCOLS]]){ const B=new Map((b[t]||[]).map(r=>[r.id,r])), C=new Map((c[t]||[]).map(r=>[r.id,r]));
+    C.forEach((r,id)=>{ const o=B.get(id); if(!o||cols.some(k=>(o[k]??null)!==(r[k]??null))){ const row={id}; cols.forEach(k=>row[k]=r[k]??null); ops.push({t,op:'put',row}); } });
+    B.forEach((r,id)=>{ if(!C.has(id)) ops.push({t,op:'del',id}); }); }
+  return ops;
+}
+let ME='', inflight=false, pushTimer=null, lastSync=null, syncErr=null, retryTimer=null, needRender=false;
+const pendingOps=()=>BASE?diffOps(BASE,dataOf(S)):[];
+function status(){ if(!GAS) return; const el=$('#sync'); let t, err=false;
+  if(syncErr){ t='⚠ 시트 저장/불러오기 실패 — 10초 후 재시도'; err=true; }
+  else if(!BASE) t='시트 불러오는 중…';
+  else if(inflight||pendingOps().length) t='저장 중…';
+  else t=`✓ 시트 동기화 ${lastSync?lastSync.toTimeString().slice(0,5):''}${ME?' · '+ME.split('@')[0]:''}`;
+  el.textContent=t; el.title=syncErr||ME; el.classList.toggle('err',err); }
+function fail(err){ inflight=false; syncErr=(err&&err.message)||String(err); status(); clearTimeout(retryTimer); retryTimer=setTimeout(()=>{ syncErr=null; BASE?push():pull(); },10000); }
+function schedulePush(){ clearTimeout(pushTimer); pushTimer=setTimeout(push,400); status(); }
+function push(){
+  if(!BASE||inflight) return;
+  const sent=dataOf(S), ops=diffOps(BASE,sent); if(!ops.length){ status(); return; }
+  inflight=true; status();
+  GAS.withSuccessHandler(d=>{ inflight=false; BASE=sent; if(JSON.stringify(dataOf(S))!==JSON.stringify(sent)){ persist(); push(); return; } receive(d); }).withFailureHandler(fail).apply(ops);
+}
+function pull(){ if(inflight) return; if(pendingOps().length){ push(); return; } GAS.withSuccessHandler(receive).withFailureHandler(fail).getAll(); }
+function receive(d){
+  if(pendingOps().length){ push(); return; }   // 응답 대기 중 로컬 수정이 생겼으면 그걸 먼저 보냄
+  ME=d.me||ME; syncErr=null; lastSync=new Date();
+  const before=JSON.stringify(dataOf(S)), c=d.config||{}, D=defaults();
+  const fresh=!('fx.미국' in c);   // 시트가 비어 있음 → 기본 설정·담당자·계획을 시트에 채움 (예시 실적 행은 제외)
+  const server={unit:c.unit, roasMin:c.roasMin, fx:{}, thr:{}, owners:d.owners||{}, plan:d.plan||{}, budget:d.budget||{}, daily:d.daily||[], pm:d.pm||[]};
+  for(const k in c){ if(k.startsWith('fx.')) server.fx[k.slice(3)]=Number(c[k]); else if(k.startsWith('thr.')) server.thr[k.slice(4)]=Number(c[k]); }
+  if(fresh){ BASE=JSON.parse(JSON.stringify(server)); Object.assign(S,{unit:D.unit,roasMin:D.roasMin,fx:D.fx,thr:D.thr,owners:D.owners,plan:D.plan,budget:D.budget,daily:server.daily,pm:server.pm}); }
+  else { Object.assign(S,server,{unit:server.unit||'만원',roasMin:server.roasMin==null?D.roasMin:Number(server.roasMin),fx:{...D.fx,...server.fx},thr:{...D.thr,...server.thr}}); migrate(S); norm(S); BASE=dataOf(S); }
+  persist(); if(JSON.stringify(dataOf(S))!==before) softRender(); status();
+  if(fresh) push();
+}
+// 입력 중에는 다시 그리지 않음 (포커스·열린 입력폼 보호) → 포커스가 빠질 때 반영
+function softRender(){ const a=document.activeElement; if((a&&a.matches('main input, main select'))||document.querySelector('form.qe:not([hidden])')){ needRender=true; return; } render(); }
+document.addEventListener('focusout',()=>setTimeout(()=>{ if(needRender) softRender(); },0));
 
 // ---------- helpers ----------
 const $=s=>document.querySelector(s);
@@ -305,7 +374,7 @@ const krw=(v,ct)=>(v==null||v===''?0:Number(v)*rate(ct)/10000);
 const fmtT=n=>(n==null||isNaN(n)||n===''?'-':fmt(n,Math.abs(n)<10?1:0));
 const fmtW=n=>{ if(n==null||isNaN(n)||n==='') return '-'; const a=Math.abs(n); if(a>=10000) return (n/10000).toFixed(a>=100000?1:2).replace(/\.?0+$/,'')+'억'; return fmtT(n)+'만원'; };
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function dateParts(){ const d=new Date(S.asof+'T00:00:00'); const y=d.getFullYear(), m=d.getMonth()+1; const mdays=new Date(y,m,0).getDate(); const edays=d.getDate(); const mstart=`${y}-${String(m).padStart(2,'0')}-01`; const pm=m===1?12:m-1, py=m===1?y-1:y; const pmstart=`${py}-${String(pm).padStart(2,'0')}-01`; const pmdays=new Date(py,pm,0).getDate(); const yest=new Date(d); yest.setDate(d.getDate()-1); const yst=yest.toISOString().slice(0,10); return {y,m,mdays,edays,mstart,pmstart,pmdays,yst}; }
+function dateParts(){ const d=new Date(S.asof+'T00:00:00'); const y=d.getFullYear(), m=d.getMonth()+1; const mdays=new Date(y,m,0).getDate(); const edays=d.getDate(); const mstart=`${y}-${String(m).padStart(2,'0')}-01`; const pm=m===1?12:m-1, py=m===1?y-1:y; const pmstart=`${py}-${String(pm).padStart(2,'0')}-01`; const pmdays=new Date(py,pm,0).getDate(); const yest=new Date(d); yest.setDate(d.getDate()-1); const yst=ymd(yest); return {y,m,mdays,edays,mstart,pmstart,pmdays,yst}; }
 function chip(ok){ return ok==null?'':`<span class="chip ${ok?'ok':'ng'}">${ok?'합격':'불합격'}</span>`; }
 function sumIf(rows,pred,f){ let s=0; for(const r of rows) if(pred(r)) s+=f(r)||0; return s; }
 function inMonth(date,y,m){ return date && date.startsWith(`${y}-${String(m).padStart(2,'0')}`); }
@@ -316,7 +385,7 @@ document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',
   ['report','daily','pm','plan','settings'].forEach(t=>$('#tab-'+t).hidden=(t!==b.dataset.tab));
 }));
 $('#asof').value=S.asof; $('#asof').addEventListener('change',e=>{ S.asof=e.target.value; save(); render(); });
-$('#btn-today').addEventListener('click',()=>{ S.asof=new Date().toISOString().slice(0,10); $('#asof').value=S.asof; save(); render(); });
+$('#btn-today').addEventListener('click',()=>{ S.asof=todayStr(); $('#asof').value=S.asof; save(); render(); });
 
 // ---------- report ----------
 function shopMetrics(ch,ct){
@@ -383,7 +452,12 @@ function renderReport(){
       <div class="bar" title="지출 ${fmtW(m.mtd)} / 예산 ${fmtW(m.bud)}"><i class="${m.burnHot?'warn':'pm'}" style="width:${w}%"></i><b style="left:${pace*100}%"></b></div>
       <div class="m"><span>지출 <strong>${fmtW(m.mtd)}</strong> / ${fmtW(m.bud)}</span><span>소진 <strong class="${m.burnHot?'neg':''}">${pct(m.burn,0)}</strong></span></div>
       <div class="row2"><span>전환매출 ${fmtW(m.rev)}</span><span>·</span><span>CPA ${fmtW(m.cpa)}</span><span>·</span><span>오늘 ${fmtW(m.today)} (${m.todayRoas==null?'-':m.todayRoas.toFixed(2)+'x'})</span></div>${qePm(r[0],r[1])}</div>`; }).join('');
-  $('#alerts').innerHTML=alerts.length?alerts.map(a=>`<span class="alert">⚠ ${esc(a)}</span>`).join(''):'<span class="alert good">✓ 모든 항목 합격 — 기준 이내</span>';
+  // 미입력: 기준일 행이 없는 채널·국가를 담당자별로 묶어 표시
+  const miss={}; const addMiss=(o,l)=>(miss[o||'담당자 미지정']||(miss[o||'담당자 미지정']=[])).push(l);
+  SHOP_ROWS.forEach(([a,b])=>{ if(!findD(a,b)) addMiss(owner(a,b),`${a} ${b}`); });
+  PM_ROWS.forEach(([a,b])=>{ if(!findP(a,b)) addMiss(owner(a,b),`${a} ${b}`); });
+  const missHtml=Object.entries(miss).map(([o,l])=>`<span class="alert miss">미입력 · ${esc(o)} — ${esc(l.join(', '))}</span>`).join('');
+  $('#alerts').innerHTML=missHtml+(alerts.length?alerts.map(a=>`<span class="alert">⚠ ${esc(a)}</span>`).join(''):'<span class="alert good">✓ 모든 항목 합격 — 기준 이내</span>');
 
   const layout=[['전체','','total'],['아마존','Subtotal','ch'],...SHOP_ROWS.filter(r=>r[0]==='아마존').map(r=>[r[0],r[1],'ct']),['틱톡샵','Subtotal','ch'],...SHOP_ROWS.filter(r=>r[0]==='틱톡샵').map(r=>[r[0],r[1],'ct'])];
   let h=`<table><thead><tr><th class="l" rowspan="2">채널</th><th class="l" rowspan="2">국가</th><th class="l" rowspan="2">담당자</th><th rowspan="2">월 계획</th><th rowspan="2">일 GOAL</th><th rowspan="2">어제</th><th class="grp" colspan="6">오늘</th><th class="grp" colspan="6">당월 누계 (MTD)</th><th class="grp" colspan="2">월말 예상</th><th class="grp" colspan="2">주문</th><th class="grp" colspan="2">광고매출</th><th class="grp" colspan="2">어필리에이트</th><th class="grp" colspan="3">전월 대비</th></tr>
@@ -425,13 +499,15 @@ function num(v){ return v===''||v==null?null:Number(v); }
 $('#daily-form').addEventListener('submit',e=>{ e.preventDefault(); const f=new FormData(e.target); S.daily.push({date:f.get('date'),ch:f.get('ch'),ct:f.get('ct'),sales:num(f.get('sales')),ad:num(f.get('ad')),orders:num(f.get('orders')),adrev:num(f.get('adrev')),aff:num(f.get('aff')),memo:f.get('memo')}); save(); render(); e.target.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value=''); });
 $('#pm-form').addEventListener('submit',e=>{ e.preventDefault(); const f=new FormData(e.target); S.pm.push({date:f.get('date'),pl:f.get('pl'),ct:f.get('ct'),spend:num(f.get('spend')),imp:num(f.get('imp')),clk:num(f.get('clk')),cv:num(f.get('cv')),rev:num(f.get('rev')),memo:f.get('memo')}); save(); render(); e.target.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value=''); });
 
+const WHOH=GAS?'<th class="l">입력자</th>':'';
+const who=r=>GAS?`<td class="l k" title="${esc(r.updatedAt||'')}">${esc((r.updatedBy||'').split('@')[0])}</td>`:'';
 function renderDaily(){
   const rows=S.daily.map((r,i)=>({...r,i})).sort((a,b)=>b.date.localeCompare(a.date)||a.ch.localeCompare(b.ch)||a.ct.localeCompare(b.ct));
   $('#daily-count').textContent=`${rows.length}행`;
   if(!rows.length){ $('#daily-table').innerHTML='<div class="empty">아직 입력이 없습니다. 위 폼으로 채널·국가별 하루 1행씩 추가하세요.</div>'; return; }
-  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">채널</th><th class="l">국가</th><th>통화</th><th>환율</th><th>총매출(현지)</th><th>광고비(현지)</th><th>주문수</th><th>광고매출(현지)</th><th>어필리에이트(현지)</th><th>총매출(만원)</th><th>광고비(만원)</th><th class="l">비고</th><th></th></tr></thead><tbody>';
+  let h=`<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">채널</th><th class="l">국가</th><th>통화</th><th>환율</th><th>총매출(현지)</th><th>광고비(현지)</th><th>주문수</th><th>광고매출(현지)</th><th>어필리에이트(현지)</th><th>총매출(만원)</th><th>광고비(만원)</th><th class="l">비고</th>${WHOH}<th></th></tr></thead><tbody>`;
   for(const r of rows){ const F=(k,step='0.01')=>`<input type="number" step="${step}" value="${r[k]??''}" data-i="${r.i}" data-k="${k}">`;
-    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="ch">${CHANNELS.map(c=>`<option ${c===r.ch?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td class="k">${fmt(rate(r.ct),1)}</td><td>${F('sales')}</td><td>${F('ad')}</td><td>${F('orders','1')}</td><td>${F('adrev')}</td><td>${r.ch==='아마존'?'<span class="k">-</span>':F('aff')}</td><td>${fmtT(krw(r.sales,r.ct))}</td><td>${fmtT(krw(r.ad,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
+    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="ch">${CHANNELS.map(c=>`<option ${c===r.ch?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td class="k">${fmt(rate(r.ct),1)}</td><td>${F('sales')}</td><td>${F('ad')}</td><td>${F('orders','1')}</td><td>${F('adrev')}</td><td>${r.ch==='아마존'?'<span class="k">-</span>':F('aff')}</td><td>${fmtT(krw(r.sales,r.ct))}</td><td>${fmtT(krw(r.ad,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td>${who(r)}<td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
   $('#daily-table').innerHTML=h+'</tbody></table>';
 }
 $('#daily-table').addEventListener('change',e=>{ const t=e.target; if(t.dataset.k==null) return; const r=S.daily[+t.dataset.i]; r[t.dataset.k]=(t.type==='number')?num(t.value):t.value; save(); render(); });
@@ -442,9 +518,9 @@ function renderPmLog(){
   const rows=S.pm.map((r,i)=>({...r,i})).sort((a,b)=>b.date.localeCompare(a.date)||a.pl.localeCompare(b.pl)||a.ct.localeCompare(b.ct));
   $('#pm-count').textContent=`${rows.length}행`;
   if(!rows.length){ $('#pm-log-table').innerHTML='<div class="empty">아직 입력이 없습니다.</div>'; return; }
-  let h='<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">플랫폼</th><th class="l">국가</th><th>통화</th><th>지출(현지)</th><th>노출</th><th>클릭</th><th>전환수</th><th>전환매출(현지)</th><th>지출(만원)</th><th>전환매출(만원)</th><th class="l">캠페인/비고</th><th></th></tr></thead><tbody>';
+  let h=`<table class="edit"><thead><tr><th class="l">날짜</th><th class="l">플랫폼</th><th class="l">국가</th><th>통화</th><th>지출(현지)</th><th>노출</th><th>클릭</th><th>전환수</th><th>전환매출(현지)</th><th>지출(만원)</th><th>전환매출(만원)</th><th class="l">캠페인/비고</th>${WHOH}<th></th></tr></thead><tbody>`;
   for(const r of rows){ const F=(k,step='0.01')=>`<input type="number" step="${step}" value="${r[k]??''}" data-i="${r.i}" data-k="${k}">`;
-    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="pl">${PLATFORMS.map(c=>`<option ${c===r.pl?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td>${F('spend')}</td><td>${F('imp','1')}</td><td>${F('clk','1')}</td><td>${F('cv','1')}</td><td>${F('rev')}</td><td>${fmtT(krw(r.spend,r.ct))}</td><td>${fmtT(krw(r.rev,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td><td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
+    h+=`<tr><td><input type="date" value="${r.date}" data-i="${r.i}" data-k="date"></td><td><select data-i="${r.i}" data-k="pl">${PLATFORMS.map(c=>`<option ${c===r.pl?'selected':''}>${c}</option>`).join('')}</select></td><td><select data-i="${r.i}" data-k="ct">${COUNTRIES.map(c=>`<option ${c[0]===r.ct?'selected':''}>${c[0]}</option>`).join('')}</select></td><td class="k">${cur(r.ct)}</td><td>${F('spend')}</td><td>${F('imp','1')}</td><td>${F('clk','1')}</td><td>${F('cv','1')}</td><td>${F('rev')}</td><td>${fmtT(krw(r.spend,r.ct))}</td><td>${fmtT(krw(r.rev,r.ct))}</td><td><input type="text" value="${esc(r.memo)}" data-i="${r.i}" data-k="memo" style="text-align:left"></td>${who(r)}<td><button class="btn danger" type="button" data-del="${r.i}" title="삭제">✕</button></td></tr>`; }
   $('#pm-log-table').innerHTML=h+'</tbody></table>';
 }
 $('#pm-log-table').addEventListener('change',e=>{ const t=e.target; if(t.dataset.k==null) return; const r=S.pm[+t.dataset.i]; r[t.dataset.k]=(t.type==='number')?num(t.value):t.value; save(); render(); });
@@ -454,13 +530,14 @@ $('#pm-log-table').addEventListener('click',e=>{ const b=e.target.closest('[data
 function toCSV(rows,cols){ const q=v=>`"${String(v??'').replace(/"/g,'""')}"`; return '\ufeff'+[cols.map(q).join(','),...rows.map(r=>cols.map(c=>q(r[c])).join(','))].join('\n'); }
 function parseCSV(text){ const lines=text.replace(/^\ufeff/,'').split(/\r?\n/).filter(l=>l.trim()); const parse=l=>{ const out=[]; let cur='',q=false; for(let i=0;i<l.length;i++){ const c=l[i]; if(q){ if(c==='"'&&l[i+1]==='"'){cur+='"';i++;} else if(c==='"') q=false; else cur+=c; } else { if(c==='"') q=true; else if(c===','){out.push(cur);cur='';} else cur+=c; } } out.push(cur); return out; }; const head=parse(lines[0]); return lines.slice(1).map(l=>{ const v=parse(l); const o={}; head.forEach((h,i)=>o[h.trim()]=v[i]); return o; }); }
 function download(name,text,type='text/csv'){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
-const DCOLS=['date','ch','ct','sales','ad','orders','adrev','aff','memo'], PCOLS=['date','pl','ct','spend','imp','clk','cv','rev','memo'];
 $('#btn-daily-csv').addEventListener('click',()=>download('일일입력.csv',toCSV(S.daily,DCOLS)));
 $('#btn-pm-csv').addEventListener('click',()=>download('퍼포먼스입력.csv',toCSV(S.pm,PCOLS)));
 $('#daily-csv-in').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const rows=parseCSV(t).filter(r=>r.date&&r.ch&&r.ct).map(r=>({date:r.date,ch:r.ch,ct:r.ct,sales:num(r.sales),ad:num(r.ad),orders:num(r.orders),adrev:num(r.adrev),aff:num(r.aff),memo:r.memo||''})); S.daily.push(...rows); save(); render(); alert(rows.length+'행 추가'); }); e.target.value=''; });
 $('#pm-csv-in').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const rows=parseCSV(t).filter(r=>r.date&&r.pl&&r.ct).map(r=>({date:r.date,pl:r.pl,ct:r.ct,spend:num(r.spend),imp:num(r.imp),clk:num(r.clk),cv:num(r.cv),rev:num(r.rev),memo:r.memo||''})); S.pm.push(...rows); save(); render(); alert(rows.length+'행 추가'); }); e.target.value=''; });
 $('#btn-export').addEventListener('click',()=>download(`drrejuall-report-${S.asof}.json`,JSON.stringify(S,null,1),'application/json'));
-$('#file-import').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ try{ const o=JSON.parse(t); if(!o.daily||!o.plan) throw 0; S=o; save(); $('#asof').value=S.asof; render(); }catch(err){ alert('백업 파일 형식이 아닙니다.'); } }); e.target.value=''; });
+$('#file-import').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ let o; try{ o=JSON.parse(t); if(!o.daily||!o.plan) throw 0; }catch(err){ alert('백업 파일 형식이 아닙니다.'); return; }
+  if(GAS&&!confirm(`공용 구글 시트의 데이터(일일 ${S.daily.length}행 · PM ${S.pm.length}행 · 계획 · 설정)를 이 백업 내용으로 교체합니다. 팀 전체에 반영됩니다. 계속할까요?`)) return;
+  const asof=S.asof; S=migrate(o); if(GAS) S.asof=asof; save(); $('#asof').value=S.asof; render(); }); e.target.value=''; });
 $('#btn-reset').addEventListener('click',()=>{ if(!confirm('모든 입력을 지우고 예시 데이터로 되돌릴까요?')) return; S=defaults(); save(); $('#asof').value=S.asof; render(); });
 
 // ---------- plan / budget / settings ----------
@@ -479,8 +556,17 @@ function renderSettings(){
 }
 $('#tab-settings').addEventListener('change',e=>{ const t=e.target; if(t.dataset.fx) S.fx[t.dataset.fx]=+t.value||0; else if(t.dataset.thr) S.thr[t.dataset.thr]=+t.value||0; else if(t.dataset.roas) S.roasMin=+t.value||0; else if(t.dataset.own!=null) S.owners[t.dataset.own]=t.value; else return; save(); render(); });
 
-function render(){ renderReport(); renderDaily(); renderPmLog(); renderPlan(); renderSettings(); }
-render();
+function render(){ needRender=false; renderReport(); renderDaily(); renderPmLog(); renderPlan(); renderSettings(); }
+if(GAS){
+  $('#sync').hidden=false; $('#btn-sync').hidden=false; $('#reset-wrap').hidden=true;
+  $('#data-note').innerHTML='이 페이지는 <b>구글 시트(db_config · db_owners · db_plan · db_daily · db_pm 탭)</b>를 공용 데이터로 씁니다. 저장하면 팀 전체에 바로 반영되고, 화면은 60초마다 자동으로 새로고침됩니다. 입력자·입력시각은 로그인 계정으로 자동 기록됩니다.';
+  $('#data-note2').innerHTML='<b>백업 불러오기(JSON)</b>는 시트 데이터 전체를 백업 내용으로 <b>교체</b>합니다. 기존 브라우저 버전의 데이터를 옮길 때 한 번 사용하세요.';
+  $('#btn-sync').addEventListener('click',pull);
+  setInterval(()=>{ if(document.visibilityState==='visible') pull(); },60000);
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') pull(); });
+}
+$('#asof').value=S.asof; render();
+if(GAS){ status(); if(pendingOps().length) push(); else pull(); }
 })();
 </script>
 </body>
